@@ -43,7 +43,7 @@ class testCase():
         if dist <= self.patrol[i].detection_dist:
           find += 1
           self.accum_time[i][j] += self.time
-          print("--------------------------{} {}, dist is {}".format(i,j, dist))
+          print("-------------------------- {} {}, dist is {}".format(i,j, dist))
           if self.ftime[i][j] == -1:
             self.ftime[i][j] = self.accum_t
             # print("{} {} first find".format(i,j))
