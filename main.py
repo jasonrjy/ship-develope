@@ -20,21 +20,16 @@ class testCase():
   def update_time(self):
     ## coordinate change after self.time
 
-    print("---------------------------- {}".format(self.accum_t))
-    # print(self.patrol[0].get_position())
-    # print(self.patrol[1].get_position())
-    # print(self.patrol[2].get_position())
-
     for i in range(len(self.patrol)):
       self.patrol[i].advance(self.time)
-      print("Patrol {} Position at time {} is".format(i, self.patrol[i].time), end=' ')
-      print(" {0} {1}".format(self.patrol[i].x, self.patrol[i].y), end='\n')
-    print("\n")
+    #   print("Patrol {} Position at time {} is".format(i, self.patrol[i].time), end=' ')
+    #   print(" {0} {1}".format(self.patrol[i].x, self.patrol[i].y), end='\n')
+    # print("\n")
     for j in range(len(self.target)):
       self.target[j].advance(self.time)
-      print("Target {} Position at time {} is".format(j, self.target[j].time), end=' ')
-      print(" {0} {1}".format(self.target[j].x, self.target[j].y), end='\n')
-    print("---------------------------------------")
+    #   print("Target {} Position at time {} is".format(j, self.target[j].time), end=' ')
+    #   print(" {0} {1}".format(self.target[j].x, self.target[j].y), end='\n')
+    # print("---------------------------------------")
 
     for i in range(len(self.patrol)):
       find = 0
@@ -43,13 +38,14 @@ class testCase():
         if dist <= self.patrol[i].detection_dist:
           find += 1
           self.accum_time[i][j] += self.time
-          print("-------------------------- {} {}, dist is {}".format(i,j, dist))
+          # print("-------------------------- {} {}, dist is {}".format(i,j, dist))
           if self.ftime[i][j] == -1:
             self.ftime[i][j] = self.accum_t
             # print("{} {} first find".format(i,j))
         else:
-          print("{} {} dist = {} NO!!!".format(i, j, dist))
-      print("\n")
+          # print("{} {} dist = {} NO!!!".format(i, j, dist))
+      # print("\n")
+          pass
       if find > 0:
           self.total_accum_t[i] += self.time
           # print("find num = {}\n".format(find))
@@ -89,7 +85,6 @@ class testCase():
 
     for i in range(len(self.patrol)):
       self.total_accum_t.append(0)
-
 
   def set_total_time(self, tt):
     self.total_time = tt
@@ -177,6 +172,9 @@ def run_fixed_case(tt, p, t):
 
   while case.accum_t < case.total_time:
     case.update_time()
+    # for i in range(3):
+    #   print("target {} ".format(i), end='')
+    #   case.target[i].print_position()
     case.accum_t += case.time
 
   for i in range(len(case.patrol)):
@@ -199,17 +197,8 @@ def cal_case(tt, cnt, p, t):
   find_count = [0,0,0]
   max_target_list = []
 
-  # for i in range(3):
-  #   max_detection_time.append(case_res[i])
-  #   accum_detection_time.append(case_res[i])
-  #   max_target_list.append(case_target)
 
-  # print("고정된 Target의 결과\n")
-  # for i in range(3):
-  #   print("{}번 경로\n 최대 접촉 시간 : {}".format(i+1, max_detection_time[i]))
-  #   print(" {}번 평균 접촉 시간 : {}\n".format(i, accum_detection_time[i]/cnt))
-
-  #### run rand case
+  # ### run rand case
   run_p = copy.deepcopy(p)
   case_res, case_target = run_rand_case(tt,run_p)
 
@@ -233,23 +222,24 @@ def cal_case(tt, cnt, p, t):
         find_count[j] += 1
 
   ### print option
-  # print("\n--------------------------\n\n총 탐색 시간 : {} 분".format(int(tt)))
-  # print("탐색 속력 : {} Knot\n\n--------------------------\n".format(p[0].knot))
+  print("\n--------------------------\n\n총 탐색 시간 : {} 분".format(int(tt)))
+  print("탐색 속력 : {} Knot\n\n--------------------------\n".format(p[0].knot))
 
-  #### run fixed case with print
-  # run_p = copy.deepcopy(p)
-  # run_t = copy.deepcopy(t)
-  # case_res, case_target = run_fixed_case(tt, run_p, run_t)
+#  run fixed case with print
+  run_p = copy.deepcopy(p)
+  run_t = copy.deepcopy(t)
+  print("고정된 Target 실행 결과")
+  case_res, case_target = run_fixed_case(tt, run_p, run_t)
 
   #### print part
   print("--------------------------\n\n{} 번의 임의 실행 결과\n".format(cnt))
-  # for i in range(3):
-  #   print("{}번이 최대 접촉할 때의 target 좌표".format(i))
-  #   for j in range(3):
-  #     print(" target {} >> x = {}, y = {}".format(j,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
-  #   print("\n")
   for i in range(3):
-    # print("{}번 경로\n 최대 접촉 시간 : {}".format(i+1, max_detection_time[i]))
+    print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
+    for j in range(3):
+      print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
+    print("\n")
+  for i in range(3):
+    print("{}번 경로\n 최대 접촉 시간 : {}".format(i+1, max_detection_time[i]))
     print(" {} 번 경로 접촉 횟수 : {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i+1, find_count[i], accum_detection_time[i]/cnt, (100 * accum_detection_time[i]/cnt)/int(tt)))
 
 
@@ -310,6 +300,7 @@ def readFile():
     for j in range(size):
       target[i].add_path(int(path[j * 2]), int(path[j * 2 + 1]))
       # print("path {} {}".format(path[j * 2], path[j*2 + 1]))
+    target[i].set_delay(random.randint(0,10))
 
   return total_time, count, patrol, target
 
@@ -330,5 +321,6 @@ if __name__ == "__main__":
   k = input("\n\n시작하시려면 아무 키나 누르십시오...")
   total_time, count, patrol, target = readFile()
   cal_case(total_time, count, patrol, target)
+  
   # test_read()
   k = input("\nPress close to exit")

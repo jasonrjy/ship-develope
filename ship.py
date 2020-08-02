@@ -1,5 +1,6 @@
 from math import sqrt, isclose
 from decimal import Decimal
+import copy
 
 def interpolate(pos1, pos2, t):
   """
@@ -45,6 +46,9 @@ class CycleUnit:
       self.length_list = []
       for i in range(self.num_path):
         self.length_list.append(distance(self.path[i], self.path[i + 1]))
+    else:
+      self.x = x
+      self.y = y
 
   def set_speed(self, speed):
     self.speed = speed
@@ -144,8 +148,8 @@ class LineUnit:
     self.delay = 0
     
  
-  def test_print(self, x):
-    print(x)
+  def print_position(self):
+    print("x = {}, y = {}".format(self.x, self.y))
   
   def add_path(self, x, y): 
     """
@@ -163,6 +167,9 @@ class LineUnit:
       self.length_list = []
       for i in range(self.num_path-1):
         self.length_list.append(distance(self.path[i], self.path[i + 1]))
+    else:
+      self.x = x
+      self.y = y
 
   def set_speed(self, speed):
     self.speed = speed
@@ -188,7 +195,8 @@ class LineUnit:
     ship 객체를 time 만큼 전진시킴.
     """
     if self.delay > 0:
-      self.delay -= self.time
+      self.delay -= time
+      # print("delay = {} self.time = {} , -= {}".format(self.delay, self.time, self.delay - time))
     else:
       self.time = self.time + time
       self.x, self.y = self.current_pos()
@@ -206,25 +214,18 @@ class LineUnit:
     #경로 전체를 한바퀴 도는데 걸리는 시간
     total_time = 1
     total_time = self.length_to_time(sum_path)
-
-    #현재 ship의 시간을 한바퀴 시간으로 나눈 나머지.
-    # remain_time = float(Decimal(str(self.time)) % Decimal(str(total_time)))
-    remain_time = self.time % float(total_time)
-    #경로 index는 0부터 시작함.
+    cur_time = copy.deepcopy(self.time)
     idx = 0
 
-    #남은 시간이 현재 경로의 시간보다 클때,
-    while remain_time > self.length_to_time(self.length_list[idx]):
-      #남은 시간에 현재 경로의 시간을 차감함.
-      remain_time = remain_time - self.length_to_time(self.length_list[idx])
-      #경로 index를 1 증가시킴
-      idx = (idx + 1) % self.num_path
+    if total_time >= cur_time:
+      while cur_time > self.length_to_time(self.length_list[idx]):
+        cur_time -=self.length_to_time(self.length_list[idx])
+        idx = (idx + 1) % self.num_path
+      unit_time = float(cur_time) / self.length_to_time(self.length_list[idx])
+      current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
+    else:
+      return [self.x, self.y] 
 
-    #이제 idx는 현재 path의 index임. 시간을 0 ~ 1로 정규화 시킴.
-    unit_time = float(remain_time) / self.length_to_time(self.length_list[idx])
-    #보간 연산을 통해 현재 ship의 위치를 계산함.
-    current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
-    
     return current_pos
 
 if __name__ == "__main__":
