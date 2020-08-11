@@ -1,91 +1,49 @@
-# importing the required libraries 
-from PyQt5.QtGui import *
-from PyQt5.QtWidgets import QMainWindow, QLabel
-from PyQt5.QtCore import Qt, QTimer
-import Ship
-import timeit
-import sys 
+from tkinter import *
+import time
+import ship
+import main
 
-class Demo(QWidget): 
-	def __init__(self): 
-		super().__init__() 
-        self.resize(1200, 800)
-        self.color = QColor(Qt.green)
-        
-        # self.drawShip = QRect(0,0,50,50)
+window = Tk()
+window.title("Ship Detection Program")
+window.resizable(0, 0)
+canvas = Canvas(window, width=640, height=640, bg="white")
+canvas.pack()
 
-		# # set the title 
-		# self.setWindowTitle("Move") 
-
-		# # setting the geometry of window 
-		# self.setGeometry(0, 0, 400, 300) 
-
-		# # creating a label widget 
-		# self.widget = QLabel('Moved', self) 
-
-		# # moving the widget 
-		# # move(left, top) 
-		# self.widget.move(50, 50)
-    
-
-		# show all the widgets 
-		# self.show() 
-
-        self.timer = QTimer(self)
-        self.timer.setInterval(self, 100)
-        self.timer.timeout.connect(self.updatePosition)
-        self.timer.start()
-        
-    def drawShip(self, x, y):
-        shipPainter = QPainter(self)
-        shipPainter.setPan(QPen(Qt.green, 3, Qt.SolidLine))
-        shipPainter.drawEllipse(x-3,y+3,6,6)
-        
-    def updatePosition(self, ship):
-        cur_x, cur_y = ship.advance(2)
-        drawShip(cur_x, cur_y)
-        self.update()
-    
-    def detection(ship, target):
-        dist = ship.distance(ship.getPosition(), target.getPosition)
-        if dist <= 5 and timer == 0
-            start_time = timeit_default_timer()
-            timer = 1
-            print("Dectection On", end='\n')
-        elif dist > 5 and timer == 1
-            end_time = timeit_default_timer()
-            timer = 0
-            print("Dectect time is {}".format(end_time-start_time), end='\n')
-            print("Dectection Off", end='\n')
-            
+canvas_start_x = 50
+canvas_start_y = 50
+canvas_x = 300
+canvas_y = 300
 
 
-# create pyqt5 app 
-App = QApplication(sys.argv) 
+def converse_x(x):
+    return 50 + x
 
 
-# create the instance of our Window
-demo = Demo()
-demo.show()
-
-ship = Ship()
-ship.set_speed(4)
-ship.add_path(0, 0)
-ship.add_path(0, 10)
-ship.add_path(20, 10)
-ship.add_path(20, 0)
-
-target = Ship()
-target.set_speed(5)
-target.add_path(0, 20)
-target.add_path(0, -40)
-
-for _ in range(10):
-    updatePosition(ship)
-    updatePosition(target)
-    detection(ship, target)
+def converse_y(y):
+    return 350 - y
 
 
-sys.exit(App.exec_())
+def update_paint(patrol, target):
+    patrol_c = []
+    target_c = []
+    for i in range(len(patrol)):
+        temp_x, temp_y = patrol[i].get_position()
+        patrol_c.append(canvas.create_oval(temp_x - 5, temp_y - 5, temp_x + 5, temp_y + 5, fill='green'))
+    for i in range(len(target)):
+        temp_x, temp_y = target[i].get_position()
+        target_c.append(canvas.create_oval(temp_x - 5, temp_y - 5, temp_x + 5, temp_y + 5, fill='red'))
 
-## https://learndataanalysis.org/how-to-create-an-object-bouncing-effect-pyqt5-tutorial/
+    window.update()
+
+
+
+#
+# ship_1 = canvas.create_oval(45, 355, 55, 345, fill='green')
+#
+# for i in range(100):
+#     canvas.move(ship_1, 3, 0)
+#     window.update()
+#     time.sleep(0.01)
+#
+window.mainloop()
+

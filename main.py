@@ -4,6 +4,8 @@ import os
 import copy
 import re
 import random
+from tkinter import *
+import paint
 
 class testCase():
   def __init__(self):
@@ -49,6 +51,8 @@ class testCase():
       if find > 0:
           self.total_accum_t[i] += self.time
           # print("find num = {}\n".format(find))
+
+      return target, patrol
 
 
   def set_rand_unit(self, p, tt):
@@ -122,7 +126,7 @@ class testCase():
       a.set_knot(target_knot)
       a.add_path(sx, sy)
       a.add_path(ex, ey)
-      # a.set_delay(random.randint(0,10))
+      a.set_delay(random.randint(0,tt/4))
 
       target.append(a)
 
@@ -171,7 +175,7 @@ def run_fixed_case(tt, p, t):
   # print("\n")
 
   while case.accum_t < case.total_time:
-    case.update_time()
+    paint.update_paint(case.update_time())
     # for i in range(3):
     #   print("target {} ".format(i), end='')
     #   case.target[i].print_position()
@@ -181,7 +185,7 @@ def run_fixed_case(tt, p, t):
         print("{} 번 경로의 탐지 결과".format(i+1))
         print(" 총 탐지 시간 = {} 분".format(case.total_accum_t[i]))
         for j in range(len(case.target)):
-            print("  target {} : 첫 발견 시간 = {} 분, 탐지 시간 = {} 분".format(j, case.ftime[i][j], case.accum_time[i][j] ),  end='\n')
+            print("  target {} : 첫 발견 시간 = {} 분, 탐지 시간 = {} 분".format(j+1, case.ftime[i][j], case.accum_time[i][j] ),  end='\n')
         print("\n")
   res = []
   res_t = case.get_target()
@@ -233,14 +237,15 @@ def cal_case(tt, cnt, p, t):
 
   #### print part
   print("--------------------------\n\n{} 번의 임의 실행 결과\n".format(cnt))
+  # for i in range(3):
+  #   print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
+  #   for j in range(3):
+  #     print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
+  #   print("\n")
   for i in range(3):
-    print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
-    for j in range(3):
-      print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
-    print("\n")
-  for i in range(3):
+    tmp = int((100 * accum_detection_time[i]/cnt)/int(tt))
     print("{}번 경로\n 최대 접촉 시간 : {}".format(i+1, max_detection_time[i]))
-    print(" {} 번 경로 접촉 횟수 : {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i+1, find_count[i], accum_detection_time[i]/cnt, (100 * accum_detection_time[i]/cnt)/int(tt)))
+    print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i+1, cnt, find_count[i], accum_detection_time[i]/cnt, tmp ))
 
 
 def readFile():
@@ -300,27 +305,38 @@ def readFile():
     for j in range(size):
       target[i].add_path(int(path[j * 2]), int(path[j * 2 + 1]))
       # print("path {} {}".format(path[j * 2], path[j*2 + 1]))
-    target[i].set_delay(random.randint(0,10))
+    # target[i].set_delay(random.randint(0,10))
 
   return total_time, count, patrol, target
 
 
+def converse_x(x):
+    return 50 + x
 
+
+def converse_y(y):
+    return 350 - y
 
 
 if __name__ == "__main__":
   print("함정 탐지 시뮬레이션")
 
-  # m.timer.start()
-  # m.start_timer()
-  # timer = QTimer()
-  # timer.setInterval(1000)
-  # timer.timeout.connect(m.update_time(1000, m.patrol, m.target, m.accum_time))
-  # timer.start()
-  
   k = input("\n\n시작하시려면 아무 키나 누르십시오...")
   total_time, count, patrol, target = readFile()
   cal_case(total_time, count, patrol, target)
-  
+  #
   # test_read()
   k = input("\nPress close to exit")
+
+  # window = Tk()
+  # window.title("Ship Detection Program")
+  # window.resizable(0, 0)
+  # canvas = Canvas(window, width=640, height=640, bg="white")
+  # canvas.pack()
+  #
+  # canvas_start_x = 50
+  # canvas_start_y = 50
+  # canvas_x = 300
+  # canvas_y = 300
+  #
+  # window.mainloop()
