@@ -1,342 +1,174 @@
-import ship
-import sys
-import os
-import copy
-import re
-import random
 from tkinter import *
-import paint
+import time
+import ship
+import case
+from PIL import Image, ImageTk, ImageDraw
 
-class testCase():
-  def __init__(self):
-    self.patrol = []
-    self.target = []
-    self.time = 1
-    self.accum_t = 0
-    self.accel = 60
-    self.total_accum_t = []
-    self.total_time = 0
-    self.accum_time = []
-    self.ftime = []
-  
-  def update_time(self):
-    ## coordinate change after self.time
+# img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
+# drw = ImageDraw.Draw(img, 'RGBA')
+# drw.ellipse([(0, 0), (200, 200)], (255, 255, 255, 255), outline=(255, 255, 0), width=3)
+# img.save("detection.png")
+#
+# image = Image.open("detection.png")
+# resize_image = image.resize((100, 100))
+# resize_image.save("detection.png")
 
-    for i in range(len(self.patrol)):
-      self.patrol[i].advance(self.time)
-    #   print("Patrol {} Position at time {} is".format(i, self.patrol[i].time), end=' ')
-    #   print(" {0} {1}".format(self.patrol[i].x, self.patrol[i].y), end='\n')
-    # print("\n")
-    for j in range(len(self.target)):
-      self.target[j].advance(self.time)
-    #   print("Target {} Position at time {} is".format(j, self.target[j].time), end=' ')
-    #   print(" {0} {1}".format(self.target[j].x, self.target[j].y), end='\n')
-    # print("---------------------------------------")
+w = 400
+h = 300
+r = 5
 
-    for i in range(len(self.patrol)):
-      find = 0
-      for j in range(len(self.target)):
-        bool, dist = self.patrol[i].detection(self.target[j])
-        if dist <= self.patrol[i].detection_dist:
-          find += 1
-          self.accum_time[i][j] += self.time
-          # print("-------------------------- {} {}, dist is {}".format(i,j, dist))
-          if self.ftime[i][j] == -1:
-            self.ftime[i][j] = self.accum_t
-            # print("{} {} first find".format(i,j))
-        else:
-          # print("{} {} dist = {} NO!!!".format(i, j, dist))
-      # print("\n")
-          pass
-      if find > 0:
-          self.total_accum_t[i] += self.time
-          # print("find num = {}\n".format(find))
+window = Tk()
+window.title("Ship Detection Program")
+window.resizable(0, 0)
+canvas = Canvas(window, width= w, height= h, bg="white")
+canvas.pack()
 
-      return target, patrol
+images = []
 
+ratio = 10
+start_x = (w - 20 * ratio)/2
+start_y = h / 2 + (10 * ratio)/2
 
-  def set_rand_unit(self, p, tt):
-    self.patrol = p
-    self.target = self.set_rand_target(tt)
+tCase = case.testCase()
+tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
+tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
-    for i in range(len(self.patrol)):
-      self.accum_time.append([])
-      for j in range(len(self.target)):
-        self.accum_time[i].append(0)
-
-    for i in range(len(self.patrol)):
-      self.ftime.append([])
-      for j in range(len(self.target)):
-        self.ftime[i].append(-1)
-
-    for i in range(len(self.patrol)):
-      self.total_accum_t.append(0)
-
-
-  def set_fixed_unit(self, p, t):
-    self.patrol = p
-    self.target = t
-
-    for i in range(len(self.patrol)):
-      self.accum_time.append([])
-      for j in range(len(self.target)):
-        self.accum_time[i].append(0)
-
-    for i in range(len(self.patrol)):
-      self.ftime.append([])
-      for j in range(len(self.target)):
-        self.ftime[i].append(-1)
-
-    for i in range(len(self.patrol)):
-      self.total_accum_t.append(0)
-
-  def set_total_time(self, tt):
-    self.total_time = tt
-
-  def set_rand_target(self, tt):
-     ### setting random target point
-    target = []
-    for i in range(3):
-      a = ship.LineUnit()
-
-      ran = random.randint(0,4)
-      if ran == 0:
-        sx = random.randint(-20,0)
-        sy = random.randint(10,20)
-      elif ran == 1:
-        sx = random.randint(0,20)
-        sy = random.randint(10,20)
-      elif ran == 2:
-        sx = random.randint(20,40)
-        sy = random.randint(10,20)
-      elif ran == 3:
-        sx = random.randint(-20,0)
-        sy = random.randint(0,10)
-      elif ran == 4:
-        sx = random.randint(20,40)
-        sy = random.randint(0,10)
-      
-      rx = random.randint(0,20)
-      ry = random.randint(0,10)
-      
-      ex = 2* rx - sx
-      ey = 2* ry - sy
-      target_knot = random.randint(10,15)
-      
-      a.set_knot(target_knot)
-      a.add_path(sx, sy)
-      a.add_path(ex, ey)
-      a.set_delay(random.randint(0,tt/4))
-
-      target.append(a)
-
-    return target
-  
-  def get_target(self):
-    return self.target
-
-
-def run_rand_case(tt, p):
-  case = testCase()
-  case.set_rand_unit(p, tt)
-  case.set_total_time(tt)
-
-  print("\n\nIf targets are this coordinate\n")
-  for i in range(len(case.target)):
-    print(" target {} >> x = {}, y = {}".format(i,case.target[i].path[0][0], case.target[i].path[0][1]))
-
-  while case.accum_t < case.total_time:
-    case.update_time()
-    case.accum_t += case.time
-
-
-  for i in range(len(case.patrol)):
-        print("Patrol {}'s detectioin".format(i))
-        print(" total detection time = {}".format(case.total_accum_t[i]))
-        for j in range(len(case.target)):
-            print("  target {} : {}, ftime = {}".format(j, case.accum_time[i][j], case.ftime[i][j]),  end='\n')
-  
-  res = []
-  res_t = case.get_target()
-  for i in range(len(case.patrol)):
-    res.append(case.total_accum_t[i])
-  
-  return res, res_t
-
-
-def run_fixed_case(tt, p, t):
-  case = testCase()
-  case.set_fixed_unit(p, t)
-  case.set_total_time(tt)
-
-  # print("\n\nIf targets are this fixed coordinate")
-  # for i in range(len(case.target)):
-  #   print(" target {} >> x = {}, y = {}".format(i,case.target[i].path[0][0], case.target[i].path[0][1]))
-  # print("\n")
-
-  while case.accum_t < case.total_time:
-    paint.update_paint(case.update_time())
-    # for i in range(3):
-    #   print("target {} ".format(i), end='')
-    #   case.target[i].print_position()
-    case.accum_t += case.time
-
-  for i in range(len(case.patrol)):
-        print("{} 번 경로의 탐지 결과".format(i+1))
-        print(" 총 탐지 시간 = {} 분".format(case.total_accum_t[i]))
-        for j in range(len(case.target)):
-            print("  target {} : 첫 발견 시간 = {} 분, 탐지 시간 = {} 분".format(j+1, case.ftime[i][j], case.accum_time[i][j] ),  end='\n')
-        print("\n")
-  res = []
-  res_t = case.get_target()
-  for i in range(len(case.patrol)):
-    res.append(case.total_accum_t[i])
-  
-  return res, res_t
-
-
-def cal_case(tt, cnt, p, t):
-  max_detection_time = []
-  accum_detection_time = []
-  find_count = [0,0,0]
-  max_target_list = []
-
-
-  # ### run rand case
-  run_p = copy.deepcopy(p)
-  case_res, case_target = run_rand_case(tt,run_p)
-
-  for i in range(3):
-    max_detection_time.append(case_res[i])
-    accum_detection_time.append(case_res[i])
-    max_target_list.append(case_target)
-    if case_res[i] > 0:
-      find_count[i] += 1
-
-  for i in range(cnt-1):
-    run_p = copy.deepcopy(p)
-    case_res, case_target = run_rand_case(tt, run_p)
-    
-    for j in range(3):
-      if (case_res[j] >= max_detection_time[j]):
-        max_detection_time[j] = case_res[j]
-        max_target_list[j] = case_target
-      accum_detection_time[j] += case_res[j]
-      if case_res[j] > 0:
-        find_count[j] += 1
-
-  ### print option
-  print("\n--------------------------\n\n총 탐색 시간 : {} 분".format(int(tt)))
-  print("탐색 속력 : {} Knot\n\n--------------------------\n".format(p[0].knot))
-
-#  run fixed case with print
-  run_p = copy.deepcopy(p)
-  run_t = copy.deepcopy(t)
-  print("고정된 Target 실행 결과")
-  case_res, case_target = run_fixed_case(tt, run_p, run_t)
-
-  #### print part
-  print("--------------------------\n\n{} 번의 임의 실행 결과\n".format(cnt))
-  # for i in range(3):
-  #   print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
-  #   for j in range(3):
-  #     print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
-  #   print("\n")
-  for i in range(3):
-    tmp = int((100 * accum_detection_time[i]/cnt)/int(tt))
-    print("{}번 경로\n 최대 접촉 시간 : {}".format(i+1, max_detection_time[i]))
-    print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i+1, cnt, find_count[i], accum_detection_time[i]/cnt, tmp ))
-
-
-def readFile():
-  file = open("사전 데이터 입력.txt", 'r', encoding = "utf-8")
-  
-  patrol = []
-  target = []
-
-  for i in range(3):
-    a = ship.CycleUnit()
-    patrol.append(a)
-    b = ship.LineUnit()
-    target.append(b)
-  
-  temp = file.readline()
-  total_time = re.split(': ', temp)[1]
-  total_time = float(total_time)
-
-  temp = file.readline()
-  count = re.split(': ', temp)[1]
-  count = int(count)
-  
-
-  ### setting patrol
-  for i in range(3):
-    desc = file.readline()
-
-    temp = file.readline()
-    knot = re.split(': ', temp)[1]
-
-    temp = file.readline()
-    path_line = re.split(': ', temp)[1]
-    temp = file.readline()
-    detect_dist = re.split(': ', temp)[1]
-
-    patrol[i].set_knot(int(knot))
-    path = re.split('; |, ', path_line)
-    size = int(len(path)/2)
-    for j in range(size):
-      patrol[i].add_path(int(path[j * 2]), int(path[j*2 + 1]))
-      # print("path {} {}".format(path[j * 2], path[j*2 + 1]))
-    patrol[i].set_detection(int(detect_dist))
-
-  ## setting target
-  for i in range(3):
-    desc = file.readline()
-
-    temp = file.readline()
-    knot = re.split(': ', temp)[1]
-
-    temp = file.readline()
-    path_line = re.split(': ', temp)[1]
-
-    target[i].set_knot(int(knot))
-    path = re.split('; |, ', path_line)
-    size = int(len(path)/2)
-    for j in range(size):
-      target[i].add_path(int(path[j * 2]), int(path[j * 2 + 1]))
-      # print("path {} {}".format(path[j * 2], path[j*2 + 1]))
-    # target[i].set_delay(random.randint(0,10))
-
-  return total_time, count, patrol, target
+c_patrol = []
+c_patrol_detection = []
+c_patrol_detection_l = []
+c_target = []
+img = ImageTk.PhotoImage(Image.open('detection.png'))
 
 
 def converse_x(x):
-    return 50 + x
+    return start_x + (x*10)
 
 
 def converse_y(y):
-    return 350 - y
+    return start_y - (y*10)
 
 
-if __name__ == "__main__":
-  print("함정 탐지 시뮬레이션")
+def converse(x, y):
+    return start_x + (x * 10), start_y - (y * 10)
 
-  k = input("\n\n시작하시려면 아무 키나 누르십시오...")
-  total_time, count, patrol, target = readFile()
-  cal_case(total_time, count, patrol, target)
-  #
-  # test_read()
-  k = input("\nPress close to exit")
 
-  # window = Tk()
-  # window.title("Ship Detection Program")
-  # window.resizable(0, 0)
-  # canvas = Canvas(window, width=640, height=640, bg="white")
-  # canvas.pack()
-  #
-  # canvas_start_x = 50
-  # canvas_start_y = 50
-  # canvas_x = 300
-  # canvas_y = 300
-  #
-  # window.mainloop()
+def init_draw_patrol(patrol):
+    for i in range(len(tCase.patrol)):
+        temp_x, temp_y = tCase.patrol[i].get_position()
+        temp_x, temp_y = converse(temp_x, temp_y)
+        ## draw patrol
+        temp_c = canvas.create_oval(temp_x - r, temp_y - r, temp_x + r, temp_y + r, fill='green')
+        c_patrol.append(temp_c)
+        ## draw detection range
+        temp_c = canvas.create_image(temp_x - (ratio * tCase.patrol[i].detection_dist), temp_y - (ratio * tCase.patrol[i].detection_dist), image=img, anchor=NW)
+        c_patrol_detection.append(temp_c)
+
+    for i in range(len(tCase.patrol)):
+        c_patrol_detection_l.append([])
+        for j in range(len(tCase.target)):
+            c_patrol_detection_l[i].append([])
+
+
+
+def init_draw_target(target):
+    for i in range(len(tCase.target)):
+      temp_x, temp_y = tCase.target[i].get_position()
+      temp_x, temp_y = converse(temp_x, temp_y)
+      ## draw target
+      temp_c = canvas.create_oval(temp_x - r, temp_y - r, temp_x + r, temp_y + r, fill='red')
+      c_target.append(temp_c)
+
+
+def update_draw_target():
+    for i in range(len(tCase.target)):
+        temp_x, temp_y = tCase.target[i].get_position()
+        temp_x, temp_y = converse(temp_x, temp_y)
+        canvas.coords(c_target[i], temp_x - r, temp_y - r, temp_x + r, temp_y + r)
+
+
+def update_draw_patrol(res):
+    for i in range(len(tCase.patrol)):
+        temp_x, temp_y = tCase.patrol[i].get_position()
+        temp_x, temp_y = converse(temp_x, temp_y)
+        canvas.coords(c_patrol[i], temp_x - r, temp_y - r, temp_x + r, temp_y + r)
+        canvas.coords(c_patrol_detection[i], temp_x-(ratio * 5), temp_y - (ratio * 5))
+
+    ### draw detection line
+    for i in range(len(tCase.patrol)):
+        for j in range(len(tCase.target)):
+            if res[i][j] != -1:
+                print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
+                x1, y1 = tCase.patrol[i].get_position()
+                x1, y1 = converse(x1, y1)
+                x2, y2 = tCase.target[j].get_position()
+                x2, y2 = converse(x2, y2)
+
+                canvas.delete(c_patrol_detection_l[i][j])
+                c_patrol_detection_l[i][j] = canvas.create_line(x1, y1, x2, y2, arrow=LAST, dash=(4, 2))
+            else:
+                canvas.delete(c_patrol_detection_l[i][j])
+
+
+def run_canvas():
+    for i in range(int(tCase.total_time)):
+        ## update time with position and return detection res
+        res = tCase.update_time()
+        # re-draw target
+        update_draw_target()
+        # re-draw patrol with detection range and detection line
+        update_draw_patrol(res)
+        window.update()
+        time.sleep(0.03)
+
+#
+# def create_oval(x1, y1, x2, y2, **kwargs):
+#     if 'alpha' in kwargs:
+#         alpha = int(kwargs.pop('alpha') * 255)
+#         fill = kwargs.pop('fill')
+#         fill = window.winfo_rgb(fill) + (alpha,)
+#         image = save_img(x1,y1,x2,y2,fill)
+#         images.append(ImageTk.PhotoImage(image))
+#         canvas.create_image(x1, y1, image=images[-1], anchor='nw')
+#
+#     oval = canvas.create_oval(x1, y1, x2, y2, **kwargs)
+#     return oval
+#
+# def save_img(x1, y1, x2, y2, fill):
+#     image = Image.new('RGBA', (x2 - x1, y2 - y1), fill)  ## Image에 대한 속성, 픽셀, 색깔 정해주기
+#     drw = ImageDraw.Draw(image)  ## image 값으로 드로우하기
+#     drw.ellipse([(x1, y1), (x2, y2)], fill, outline="yellow")
+#     # drw.ellipse([(x1, y1), (x2, y2)], fill, outline=None)
+#     return image
+#
+#
+# def t_create_oval(x1, y1, x2, y2, **kwargs):
+#     if "alpha" in kwargs:
+#         if "fill" in kwargs:
+#             # Get and process the input data
+#             fill = window.winfo_rgb(kwargs.pop("fill"))\
+#                    + (int(kwargs.pop("alpha") * 255),)
+#             outline = kwargs.pop("outline") if "outline" in kwargs else None
+#             # We need to find a rectangle the polygon is inscribed in
+#             # (max(args[::2]), max(args[1::2])) are x and y of the bottom right point of this rectangle
+#             # and they also are the width and height of it respectively (the image will be inserted into
+#             # (0, 0) coords for simplicity)
+#             image = Image.new("RGBA", (x2 - x1, y2 - y1), fill)
+#             ImageDraw.Draw(image).ellipse([(x1, y1), (x2, y2)], fill=fill, outline=outline)
+#             images.append(ImageTk.PhotoImage(image))  # prevent the Image from being garbage-collected
+#             return canvas.create_image(0, 0, image=images[-1], anchor="nw")  # insert the Image to the 0, 0 coords
+#         raise ValueError("fill color must be specified!")
+#     return canvas.create_oval(x1, y1, x2, y2, **kwargs)
+
+######## init setting section
+
+init_draw_patrol(tCase.patrol)
+init_draw_target(tCase.target)
+window.update()
+
+########
+run_canvas()
+
+
+#
+window.mainloop()
+

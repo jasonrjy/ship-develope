@@ -122,17 +122,6 @@ class CycleUnit:
     else:
       return -1, dist
 
-    def detection_multiple(self, target):
-      for t in range(len(target)):
-        dist = distance(self.get_position(), t.get_position())
-        if dist <= 5 and self.detection_on == 0:
-          self.detection_on = 1
-          # return 1, dist
-        elif dist > 5 and self.detection_on == 1:
-          self.detection_on = 0
-          return 0, dist
-        else:
-          return -1, dist
 
 class LineUnit:
   def __init__(self):
@@ -183,6 +172,9 @@ class LineUnit:
       
   def get_position(self):
     return [self.x, self.y]
+
+  def get_position2(self):
+    return self.x, self.y
 
   def length_to_time(self, length):
     """
