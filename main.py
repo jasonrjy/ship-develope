@@ -1,4 +1,5 @@
-from tkinter import *
+import tkinter as tk
+import tkinter.ttk
 import time
 import ship
 import case
@@ -13,21 +14,23 @@ from PIL import Image, ImageTk, ImageDraw
 # resize_image = image.resize((100, 100))
 # resize_image.save("detection.png")
 
-w = 400
-h = 300
-r = 5
+window_w = 400
+window_h = 300
+ship_r = 5
 
-window = Tk()
+window = tk.Tk()
 window.title("Ship Detection Program")
+window.geometry("800x500")
 window.resizable(0, 0)
-canvas = Canvas(window, width= w, height= h, bg="white")
+
+canvas = tk.Canvas(window, width=window_w, height=window_h, bg="white")
 canvas.pack()
 
 images = []
 
 ratio = 10
-start_x = (w - 20 * ratio)/2
-start_y = h / 2 + (10 * ratio)/2
+start_x = (window_w - 20 * ratio) / 2
+start_y = window_h / 2 + (10 * ratio) / 2
 
 tCase = case.testCase()
 tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
@@ -57,10 +60,10 @@ def init_draw_patrol(patrol):
         temp_x, temp_y = tCase.patrol[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
         ## draw patrol
-        temp_c = canvas.create_oval(temp_x - r, temp_y - r, temp_x + r, temp_y + r, fill='green')
+        temp_c = canvas.create_oval(temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r, fill='green')
         c_patrol.append(temp_c)
         ## draw detection range
-        temp_c = canvas.create_image(temp_x - (ratio * tCase.patrol[i].detection_dist), temp_y - (ratio * tCase.patrol[i].detection_dist), image=img, anchor=NW)
+        temp_c = canvas.create_image(temp_x - (ratio * tCase.patrol[i].detection_dist), temp_y - (ratio * tCase.patrol[i].detection_dist), image=img, anchor=tk.NW)
         c_patrol_detection.append(temp_c)
 
     for i in range(len(tCase.patrol)):
@@ -75,7 +78,7 @@ def init_draw_target(target):
       temp_x, temp_y = tCase.target[i].get_position()
       temp_x, temp_y = converse(temp_x, temp_y)
       ## draw target
-      temp_c = canvas.create_oval(temp_x - r, temp_y - r, temp_x + r, temp_y + r, fill='red')
+      temp_c = canvas.create_oval(temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r, fill='red')
       c_target.append(temp_c)
 
 
@@ -83,14 +86,14 @@ def update_draw_target():
     for i in range(len(tCase.target)):
         temp_x, temp_y = tCase.target[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
-        canvas.coords(c_target[i], temp_x - r, temp_y - r, temp_x + r, temp_y + r)
+        canvas.coords(c_target[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
 
 
 def update_draw_patrol(res):
     for i in range(len(tCase.patrol)):
         temp_x, temp_y = tCase.patrol[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
-        canvas.coords(c_patrol[i], temp_x - r, temp_y - r, temp_x + r, temp_y + r)
+        canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
         canvas.coords(c_patrol_detection[i], temp_x-(ratio * 5), temp_y - (ratio * 5))
 
     ### draw detection line
@@ -104,7 +107,7 @@ def update_draw_patrol(res):
                 x2, y2 = converse(x2, y2)
 
                 canvas.delete(c_patrol_detection_l[i][j])
-                c_patrol_detection_l[i][j] = canvas.create_line(x1, y1, x2, y2, arrow=LAST, dash=(4, 2))
+                c_patrol_detection_l[i][j] = canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2))
             else:
                 canvas.delete(c_patrol_detection_l[i][j])
 
