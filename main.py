@@ -4,6 +4,7 @@ import time
 import ship
 import case
 from PIL import Image, ImageTk, ImageDraw
+import InfoTable
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -22,6 +23,12 @@ window = tk.Tk()
 window.title("Ship Detection Program")
 window.geometry("800x500")
 window.resizable(0, 0)
+
+frame_info = tk.Frame(window)
+frame_canvas = tk.Frame(window)
+
+frame_canvas.pack(side="left", fill="both")
+frame_info.pack(side="right", fill="both")
 
 canvas = tk.Canvas(window, width=window_w, height=window_h, bg="white")
 canvas.pack()
@@ -166,6 +173,9 @@ def run_canvas():
 
 init_draw_patrol(tCase.patrol)
 init_draw_target(tCase.target)
+idata = InfoTable.read_file_formatting(InfoTable, tCase.patrol, tCase.target)
+InfoTable.init_info(frame_info, idata)
+
 window.update()
 
 ########

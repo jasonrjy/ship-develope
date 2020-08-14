@@ -63,6 +63,26 @@ class CycleUnit:
   def get_position(self):
     return [self.x, self.y]
 
+
+  def get_x(self):
+    return self.x
+
+
+  def get_y(self):
+    return self.y
+
+
+  def get_knot(self):
+    return self.knot
+
+
+  def get_detection_dist(self):
+    return self.detection_dist
+
+  def get_path(self):
+    return self.path
+
+
   def length_to_time(self, length):
     """
     주어진 길이를 속도로 나눠 걸리는 시간을 반환
