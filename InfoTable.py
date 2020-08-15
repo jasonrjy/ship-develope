@@ -2,6 +2,15 @@ import tkinter.ttk
 import tkinter as tk
 
 
+
+def update_info(info_t, data):
+    # temp = info_t.selection_set("x")
+    # print(temp)
+    # info_t.delete(temp)
+    # temp = info_t.selection_set("y")
+    # info_t.delete(temp)
+    pass
+
 def path_to_string(s):
     res = ""
     for i in range(len(s)-1):
@@ -71,6 +80,7 @@ def init_info(frame_i, init_data):
         data.append(init_data[i][0])
     info_tree.insert('', "end", text="X", values=data, iid="x")
 
+
     data = []
     for i in range(len(init_data)):
         data.append(init_data[i][1])
@@ -137,4 +147,6 @@ def init_info(frame_i, init_data):
     #     info_tree.insert('', "end", text="D_range", values=init_data[i][8], iid="dr" + str(i))
     # for i in range(len(init_data)):
     #     info_tree.insert('', "end", text="Path", values=init_data[i][9], iid="path" + str(i))
+
+    return info_tree
 

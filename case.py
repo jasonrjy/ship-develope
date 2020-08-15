@@ -19,6 +19,13 @@ class testCase():
         self.accum_time = []
         self.ftime = []
 
+    def get_all_position(self):
+        data = []
+        for ele in self.patrol:
+            t_data = ele.get_position()
+            data.append(t_data)
+        return data
+
     def update_time(self):
         ## coordinate change after self.time
 

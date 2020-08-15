@@ -46,5 +46,5 @@ class ImageLabel(Label):
 root = Tk()
 lbl = ImageLabel(root)
 lbl.pack()
-lbl.load('Joyuri.gif')
+lbl.load('patin.gif')
 root.mainloop()

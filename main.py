@@ -5,6 +5,7 @@ import ship
 import case
 from PIL import Image, ImageTk, ImageDraw
 import InfoTable
+import sInfoTbl
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -60,6 +61,61 @@ def converse_y(y):
 
 def converse(x, y):
     return start_x + (x * 10), start_y - (y * 10)
+
+
+def path_to_string(s):
+    res = ""
+    i = 0
+    for i in range(len(s) - 1):
+        res += str(s[i][0])
+        res += ", "
+        res += str(s[i][1])
+        res += " > "
+    res += str(s[i][0])
+    res += ", "
+    res += str(s[i][1])
+
+    return res
+
+def path_to_string_nl(s):
+    res = ""
+    i = 0
+    for i in range(len(s)):
+        res += str(s[i][0])
+        res += ", "
+        res += str(s[i][1])
+        res += '\n'
+    res = res[:-1]
+
+    return res
+
+
+def read_file_formatting(patrol, target):
+    data = []
+
+    for i in range(len(patrol)):
+        data.append([])
+        for j in range(len(target) + 7):
+            data[i].append(0)
+
+    for i in range(len(patrol)):
+        data[i][0] = patrol[i].get_x()
+        data[i][1] = patrol[i].get_y()
+        # 현 탐지
+        data[i][2] = 0
+        # 총 탐지
+        data[i][3] = 0
+        # 경로
+        data[i][-1] = path_to_string_nl(patrol[i].get_path())
+        # 탐지 범위
+        data[i][-2] = patrol[i].get_detection_dist()
+        # Knot
+        data[i][-3] = patrol[i].get_knot()
+        # target detection time
+        for j in range(len(target)):
+            data[i][4 + j] = 0
+
+    return data
 
 
 def init_draw_patrol(patrol):
@@ -123,10 +179,16 @@ def run_canvas():
     for i in range(int(tCase.total_time)):
         ## update time with position and return detection res
         res = tCase.update_time()
+        # get now patrol position to list
+        patrol_all_p = tCase.get_all_position()
+
         # re-draw target
         update_draw_target()
         # re-draw patrol with detection range and detection line
         update_draw_patrol(res)
+        # update x,y
+        info_t.update_position(patrol_all_p)
+
         window.update()
         time.sleep(0.03)
 
@@ -173,8 +235,8 @@ def run_canvas():
 
 init_draw_patrol(tCase.patrol)
 init_draw_target(tCase.target)
-idata = InfoTable.read_file_formatting(InfoTable, tCase.patrol, tCase.target)
-InfoTable.init_info(frame_info, idata)
+idata = read_file_formatting(tCase.patrol, tCase.target)
+info_t = sInfoTbl.Table(frame_info, idata)
 
 window.update()
 

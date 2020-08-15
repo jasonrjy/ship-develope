@@ -79,6 +79,7 @@ class CycleUnit:
   def get_detection_dist(self):
     return self.detection_dist
 
+
   def get_path(self):
     return self.path
 
