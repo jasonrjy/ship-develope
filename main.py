@@ -7,6 +7,7 @@ import case
 from PIL import Image, ImageTk, ImageDraw
 import InfoTable
 import sInfoTbl
+import waiting
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -22,8 +23,10 @@ window_h = 300
 ship_r = 5
 
 ## -1 == 첫 시작, 0 = stop, 1 = run, 2 = end
-global running
+global running, store_time
 running = -1
+store_time = 0
+
 
 window = tk.Tk()
 window.title("Ship Detection Program")
@@ -235,10 +238,12 @@ def run_canvas():
     for t in tCase.target:
         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
 
-    global running
+    global running, store_time
     running = 1
 
-    for i in range(int(tCase.total_time)):
+    for i in range(store_time, int(tCase.total_time)):
+        store_time = i
+        print(i)
         if running == 1:
             ## update time with position and return detection res
             res = tCase.update_time()
@@ -255,15 +260,24 @@ def run_canvas():
 
             window.update()
             time.sleep(0.03)
+        else:
+            return i
+            # print("waiting start")
+            # # waiting.wait(lambda: run_ready(), timeout_seconds=120, waiting_for="something to be ready")
+            # print("waiting end")
 
-    ## end of loop
-    btn_run['state'] = tk.DISABLED
+    ## stop이 아니면 > 루프가 끝났다면
+    if running != 0:
+        btn_run['state'] = tk.DISABLED
 
 def reset_info():
-    global running
+    global running, store_time
     running = -1
+    store_time = 0
 
     btn_run['state'] = tk.NORMAL
+    rdioR['state'] = tk.NORMAL
+    rdioF['state'] = tk.NORMAL
     if btn_run['text'] == 'Stop':
         btn_run['text'] = 'Run'
 
@@ -300,14 +314,27 @@ def reset_info():
 
 
 def toggleBtn():
+    global running
+
     if(btn_run['text']=='Run'):
+        rdioF['state'] = tk.DISABLED
+        rdioR['state'] = tk.DISABLED
         btn_run['text']='Stop'
+        running = 1
         run_canvas()
 
     elif(btn_run['text']=='Stop'):
         btn_run['text']='Run'
-        global running
         running = 0
+
+
+def run_ready():
+    global running
+    if running == 1:
+        print(running)
+        return True
+    print(running)
+    return False
 
 #
 # def create_oval(x1, y1, x2, y2, **kwargs):
