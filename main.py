@@ -118,20 +118,31 @@ def read_file_formatting(patrol, target):
     return data
 
 
-def init_draw_patrol(patrol):
-    for i in range(len(tCase.patrol)):
-        temp_x, temp_y = tCase.patrol[i].get_position()
+def init_draw_patrol(patrol, target):
+    for i in range(len(patrol)):
+        temp_x, temp_y = patrol[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
+
+        ## draw path
+        for p in patrol:
+            cur_path = p.get_path()
+            num = len(cur_path)-1
+            for j in range(num):
+                x1 = converse_x(cur_path[j][0])
+                y1 = converse_y(cur_path[j][1])
+                x2 = converse_x(cur_path[j+1][0])
+                y2 = converse_y(cur_path[j+1][1])
+                canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="green")
         ## draw patrol
         temp_c = canvas.create_oval(temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r, fill='green')
         c_patrol.append(temp_c)
         ## draw detection range
-        temp_c = canvas.create_image(temp_x - (ratio * tCase.patrol[i].detection_dist), temp_y - (ratio * tCase.patrol[i].detection_dist), image=img, anchor=tk.NW)
+        temp_c = canvas.create_image(temp_x - (ratio * patrol[i].detection_dist), temp_y - (ratio * patrol[i].detection_dist), image=img, anchor=tk.NW)
         c_patrol_detection.append(temp_c)
 
-    for i in range(len(tCase.patrol)):
+    for i in range(len(patrol)):
         c_patrol_detection_l.append([])
-        for j in range(len(tCase.target)):
+        for j in range(len(target)):
             c_patrol_detection_l[i].append([])
 
 
@@ -232,8 +243,7 @@ def run_canvas():
 #     return canvas.create_oval(x1, y1, x2, y2, **kwargs)
 
 ######## init setting section
-
-init_draw_patrol(tCase.patrol)
+init_draw_patrol(tCase.patrol, tCase.target)
 init_draw_target(tCase.target)
 idata = read_file_formatting(tCase.patrol, tCase.target)
 info_t = sInfoTbl.Table(frame_info, idata)

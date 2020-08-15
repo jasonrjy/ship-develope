@@ -53,8 +53,6 @@ class Table:
                     self.e.grid(row=i, column=j)
 
     def update_position(self, edit):
-        print(self.data_t)
-        print(edit)
         for i in range(len(self.data_t[0])):
             for j in range(2):
                 data = round(edit[i][j], 2)
