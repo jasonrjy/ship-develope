@@ -147,8 +147,41 @@ class testCase():
             rx = random.randint(0, 20)
             ry = random.randint(0, 10)
 
-            ex = 2 * rx - sx
-            ey = 2 * ry - sy
+            dy = ry - sy
+            dx = rx - sx
+            if dy > 0:
+                n = (40 - sy) / dy
+                ey = 40
+                ex = sx + n * dx
+            elif dy < 0:
+                n = (-40 - sy) / dy
+                ey = -40
+                ex = sx + n * dx
+            ## dy == 0 and ry == 10
+            elif ry == 5:
+                ry = 8
+                dy = ry - sy
+                if dy > 0:
+                    n = (40 - sy) / dy
+                    ey = 40
+                    ex = sx + n * dx
+                elif dy < 0:
+                    n = (-40 - sy) / dy
+                    ey = -40
+                    ex = sx + n * dx
+            ## dy == 0 and ry != 10
+            else:
+                ry = 10
+                dy = ry - sy
+                if dy > 0:
+                    n = (40 - sy) / dy
+                    ey = 40
+                    ex = sx + n * dx
+                elif dy < 0:
+                    n = (-40 - sy) / dy
+                    ey = -40
+                    ex = sx + n * dx
+
             target_knot = random.randint(10, 15)
 
             a.set_knot(target_knot)

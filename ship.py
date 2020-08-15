@@ -208,9 +208,13 @@ class LineUnit:
     ship 객체를 time 만큼 전진시킴.
     """
     if self.delay > 0:
+      self.x = -999
+      self.y = -999
       self.delay -= time
       # print("delay = {} self.time = {} , -= {}".format(self.delay, self.time, self.delay - time))
     else:
+      self.x = self.path[0][0]
+      self.y = self.path[0][1]
       self.time = self.time + time
       self.x, self.y = self.current_pos()
       # print("Position at time {} is".format(self.time), end=' ')

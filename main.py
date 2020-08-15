@@ -1,3 +1,4 @@
+import copy
 import tkinter as tk
 import tkinter.ttk
 import time
@@ -27,22 +28,58 @@ window.resizable(0, 0)
 
 frame_info = tk.Frame(window)
 frame_canvas = tk.Frame(window)
+frame_btn = tk.Frame(window)
 
-frame_canvas.pack(side="left", fill="both")
-frame_info.pack(side="right", fill="both")
+# frame_canvas.pack(side="left", fill="both")
+# frame_info.pack(side="right", fill="both")
+frame_canvas.grid(row=0, column=0)
+frame_info.grid(row=0, column=1)
+frame_btn.grid(row=1, column=1)
 
-canvas = tk.Canvas(window, width=window_w, height=window_h, bg="white")
+canvas = tk.Canvas(frame_canvas, width=window_w, height=window_h, bg="white")
 canvas.pack()
+
+f_tbl = tk.Frame(frame_info)
+f_lbl = tk.Frame(frame_info)
+f_chk = tk.Frame(frame_info)
+
+f_lbl.grid(row=0)
+f_chk.grid(row=1)
+f_tbl.grid(row=2)
+
+
+def RdiotoFixed():
+    tCase.target = init_target
+    for t in tCase.target:
+        print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+
+
+def RdiotoRandom():
+    tCase.target = tCase.set_rand_target(tCase.total_time)
+    for t in tCase.target:
+        print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+
+## Check
+radioValue = tk.IntVar()
+rdioLbl = tk.Label(f_chk, text="Select Target Type : ")
+rdioF = tk.Radiobutton(f_chk, text="Fixed", variable=radioValue, value=1, command=RdiotoFixed)
+rdioF.select()
+rdioR = tk.Radiobutton(f_chk, text="Random", variable=radioValue, value=2, command=RdiotoRandom)
+
+rdioLbl.grid(row=0, column=0)
+rdioF.grid(row=0, column=1)
+rdioR.grid(row=0, column=2)
+
+# Label
+head_lbl = tk.Label(f_lbl, text="Ship Info.")
+head_lbl.grid(row=0)
+
 
 images = []
 
 ratio = 10
 start_x = (window_w - 20 * ratio) / 2
 start_y = window_h / 2 + (10 * ratio) / 2
-
-tCase = case.testCase()
-tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
-tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
 c_patrol = []
 c_patrol_detection = []
@@ -63,6 +100,9 @@ def converse(x, y):
     return start_x + (x * 10), start_y - (y * 10)
 
 
+
+
+
 def path_to_string(s):
     res = ""
     i = 0
@@ -76,6 +116,7 @@ def path_to_string(s):
     res += str(s[i][1])
 
     return res
+
 
 def path_to_string_nl(s):
     res = ""
@@ -187,6 +228,9 @@ def update_draw_patrol(res):
 
 
 def run_canvas():
+    for t in tCase.target:
+        print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+
     for i in range(int(tCase.total_time)):
         ## update time with position and return detection res
         res = tCase.update_time()
@@ -199,9 +243,28 @@ def run_canvas():
         update_draw_patrol(res)
         # update x,y
         info_t.update_position(patrol_all_p)
+        info_t.update_now_detection(res)
+        info_t.update_res_detection(tCase)
 
         window.update()
         time.sleep(0.03)
+
+def reset_info():
+    init_setting()
+
+def init_setting():
+    idata = read_file_formatting(init_patrol, init_target)
+    info_t = sInfoTbl.Table(f_tbl, idata, tCase)
+    count = 0
+
+    tCase.set_fixed_unit(init_patrol, init_target)
+
+    canvas.delete(c_patrol)
+    canvas.delete(c_patrol_detection)
+    canvas.delete(c_target)
+
+    # init_draw_patrol(init_patrol, init_target)
+    # init_draw_target(init_target)
 
 #
 # def create_oval(x1, y1, x2, y2, **kwargs):
@@ -243,15 +306,33 @@ def run_canvas():
 #     return canvas.create_oval(x1, y1, x2, y2, **kwargs)
 
 ######## init setting section
+
+tCase = case.testCase()
+tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
+## init store
+init_target = copy.deepcopy(tCase.target)
+init_patrol = copy.deepcopy(tCase.patrol)
+init_count = copy.deepcopy(count)
+init_total_time = copy.deepcopy(tCase.total_time)
+
+idata = read_file_formatting(tCase.patrol, tCase.target)
+info_t = sInfoTbl.Table(f_tbl, idata, tCase)
+
+tCase.set_fixed_unit(tCase.patrol, tCase.target)
+
 init_draw_patrol(tCase.patrol, tCase.target)
 init_draw_target(tCase.target)
-idata = read_file_formatting(tCase.patrol, tCase.target)
-info_t = sInfoTbl.Table(frame_info, idata)
+
+btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)
+btn_reset.grid(row=0, column=0, pady=10, padx=5)
+btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=run_canvas)
+btn_run.grid(row=0, column=1, pady=10, padx=5)
+
 
 window.update()
 
 ########
-run_canvas()
+# run_canvas()
 
 
 #
