@@ -7,7 +7,6 @@ import case
 from PIL import Image, ImageTk, ImageDraw
 import InfoTable
 import sInfoTbl
-import waiting
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -282,6 +281,12 @@ def reset_info():
         btn_run['text'] = 'Run'
 
     tCase.patrol = copy.deepcopy(init_patrol)
+    for i in range(len(tCase.total_accum_t)):
+        tCase.total_accum_t[i] = 0
+    for i in range(len(tCase.accum_time)):
+        for j in range(len(tCase.accum_time[i])):
+            tCase.accum_time[i][j] = 0
+
     if radioValue.get() == 2:
         RdiotoRandom()
     else:
