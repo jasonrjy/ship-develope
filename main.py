@@ -21,6 +21,9 @@ window_w = 400
 window_h = 300
 ship_r = 5
 
+global running
+running = -1
+
 window = tk.Tk()
 window.title("Ship Detection Program")
 window.geometry("800x500")
@@ -231,40 +234,62 @@ def run_canvas():
     for t in tCase.target:
         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
 
+    global running
+    running = 1
+
     for i in range(int(tCase.total_time)):
-        ## update time with position and return detection res
-        res = tCase.update_time()
-        # get now patrol position to list
-        patrol_all_p = tCase.get_all_position()
+        if running == 1:
+            ## update time with position and return detection res
+            res = tCase.update_time()
+            # get now patrol position to list
+            patrol_all_p = tCase.get_all_position()
+            # re-draw target
+            update_draw_target()
+            # re-draw patrol with detection range and detection line
+            update_draw_patrol(res)
+            # update x,y
+            info_t.update_position(patrol_all_p)
+            info_t.update_now_detection(res)
+            info_t.update_res_detection(tCase)
 
-        # re-draw target
-        update_draw_target()
-        # re-draw patrol with detection range and detection line
-        update_draw_patrol(res)
-        # update x,y
-        info_t.update_position(patrol_all_p)
-        info_t.update_now_detection(res)
-        info_t.update_res_detection(tCase)
-
-        window.update()
-        time.sleep(0.03)
+            window.update()
+            time.sleep(0.03)
 
 def reset_info():
-    init_setting()
-
-def init_setting():
+    global running
+    running = -1
     idata = read_file_formatting(init_patrol, init_target)
     info_t = sInfoTbl.Table(f_tbl, idata, tCase)
     count = 0
 
     tCase.set_fixed_unit(init_patrol, init_target)
 
-    canvas.delete(c_patrol)
-    canvas.delete(c_patrol_detection)
-    canvas.delete(c_target)
+    for i in range(len(c_patrol)):
+        temp_x, temp_y = init_patrol[i].get_position()
+        temp_x, temp_y = converse(temp_x, temp_y)
+        canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
+        canvas.coords(c_patrol_detection[i], temp_x - (ratio * 5), temp_y - (ratio * 5))
+    for i in range(len(c_target)):
+        temp_x, temp_y = init_target[i].get_position()
+        temp_x, temp_y = converse(temp_x, temp_y)
+        canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
+    for i in range(len(c_patrol_detection_l)):
+        for j in range(len(c_patrol_detection_l[i])):
+            canvas.delete(c_patrol_detection_l[i][j])
 
-    # init_draw_patrol(init_patrol, init_target)
-    # init_draw_target(init_target)
+    init_draw_patrol(init_patrol, init_target)
+    init_draw_target(init_target)
+
+
+def toggleBtn():
+    if(btn_run['text']=='Run'):
+        btn_run['text']='Stop'
+        run_canvas()
+
+    elif(btn_run['text']=='Stop'):
+        btn_run['text']='Run'
+        global running
+        running = 0
 
 #
 # def create_oval(x1, y1, x2, y2, **kwargs):
@@ -323,9 +348,10 @@ tCase.set_fixed_unit(tCase.patrol, tCase.target)
 init_draw_patrol(tCase.patrol, tCase.target)
 init_draw_target(tCase.target)
 
+
 btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)
 btn_reset.grid(row=0, column=0, pady=10, padx=5)
-btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=run_canvas)
+btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=toggleBtn)
 btn_run.grid(row=0, column=1, pady=10, padx=5)
 
 
