@@ -7,6 +7,7 @@ class Table:
 
     def __init__(self, frame, data, tCase):
 
+        self.init_patrol = copy.deepcopy(tCase.patrol)
         self.init_target = copy.deepcopy(tCase.target)
         self.tCase = tCase
         self.target = copy.copy(tCase.target)
@@ -110,6 +111,22 @@ class Table:
             self.data_t[3][i].set(case.total_accum_t[i])
             for j in range(len(case.target)):
                 self.data_t[4+j][i].set(case.accum_time[i][j])
+
+    def reset(self):
+        ## i = property, j = patrol num
+        for j in range(len(self.data_t[0])):
+            self.data_t[0][j].set(self.init_patrol[j].get_x())
+            self.data_t[1][j].set(self.init_patrol[j].get_y())
+            self.data_t[2][j].set("None")
+            self.data_t[3][j].set(0)
+            self.data_t[4][j].set(0)
+            self.data_t[5][j].set(0)
+            self.data_t[6][j].set(0)
+
+        # for i in range(len(self.data_t)):
+        #     print("i start")
+        #     for j in range(len(self.data_t[i])):
+        #         print(str(self.data_t[i][j].get()))
 
 
 

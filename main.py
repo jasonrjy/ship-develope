@@ -21,6 +21,7 @@ window_w = 400
 window_h = 300
 ship_r = 5
 
+## -1 == 첫 시작, 0 = stop, 1 = run, 2 = end
 global running
 running = -1
 
@@ -52,7 +53,7 @@ f_tbl.grid(row=2)
 
 
 def RdiotoFixed():
-    tCase.target = init_target
+    tCase.target = copy.deepcopy(init_target)
     for t in tCase.target:
         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
 
@@ -218,7 +219,7 @@ def update_draw_patrol(res):
     for i in range(len(tCase.patrol)):
         for j in range(len(tCase.target)):
             if res[i][j] != -1:
-                print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
+                # print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
                 x1, y1 = tCase.patrol[i].get_position()
                 x1, y1 = converse(x1, y1)
                 x2, y2 = tCase.target[j].get_position()
@@ -255,30 +256,47 @@ def run_canvas():
             window.update()
             time.sleep(0.03)
 
+    ## end of loop
+    btn_run['state'] = tk.DISABLED
+
 def reset_info():
     global running
     running = -1
-    idata = read_file_formatting(init_patrol, init_target)
-    info_t = sInfoTbl.Table(f_tbl, idata, tCase)
+
+    btn_run['state'] = tk.NORMAL
+    if btn_run['text'] == 'Stop':
+        btn_run['text'] = 'Run'
+
+    tCase.patrol = copy.deepcopy(init_patrol)
+    if radioValue.get() == 2:
+        RdiotoRandom()
+    else:
+        tCase.target = copy.deepcopy(init_target)
+    idata = read_file_formatting(tCase.patrol, tCase.target)
+    tCase.accum_t = 0
+    info_t.reset()
     count = 0
 
-    tCase.set_fixed_unit(init_patrol, init_target)
+    tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
     for i in range(len(c_patrol)):
-        temp_x, temp_y = init_patrol[i].get_position()
+        temp_x, temp_y = tCase.patrol[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
+        # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
+
         canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
+        # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
         canvas.coords(c_patrol_detection[i], temp_x - (ratio * 5), temp_y - (ratio * 5))
     for i in range(len(c_target)):
-        temp_x, temp_y = init_target[i].get_position()
+        temp_x, temp_y = tCase.target[i].get_position()
         temp_x, temp_y = converse(temp_x, temp_y)
-        canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
+        canvas.coords(c_target[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
     for i in range(len(c_patrol_detection_l)):
         for j in range(len(c_patrol_detection_l[i])):
             canvas.delete(c_patrol_detection_l[i][j])
-
-    init_draw_patrol(init_patrol, init_target)
-    init_draw_target(init_target)
+    #
+    # init_draw_patrol(tCase.patrol, tCase.target)
+    # init_draw_target(tCase.target)
 
 
 def toggleBtn():
