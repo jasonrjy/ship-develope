@@ -5,6 +5,7 @@ import case
 from PIL import Image, ImageTk, ImageDraw
 import sInfoTbl
 import GUI
+import type
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -45,27 +46,52 @@ f_chk.grid(row=1)
 f_tbl.grid(row=2)
 
 
-def RdiotoFixed():
-    tCase.target = copy.deepcopy(init_target)
-    for t in tCase.target:
-        print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+# def RdiotoFixed():
+#     tCase.target = copy.deepcopy(init_target)
+#     for t in tCase.target:
+#         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+#
+#
+# def RdiotoRandom():
+#     tCase.target = tCase.set_rand_target(tCase.total_time)
+#     for t in tCase.target:
+#         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
+#
+#
+# def bbsSelectG():
+#     ## Check F or R
+#     targetType = tk.IntVar()
+#     rdioLbl = tk.Label(f_chk, text="Select Target Type : ")
+#     rdioF = tk.Radiobutton(f_chk, text="Fixed", variable=targetType, value=1, command=RdiotoFixed)
+#     rdioF.select()
+#     rdioR = tk.Radiobutton(f_chk, text="Random", variable=targetType, value=2, command=RdiotoRandom)
+#
+#     # rdioLbl.grid(row=1, column=0)
+#     # rdioF.grid(row=1, column=1)
+#     # rdioR.grid(row=1, column=2)
+#
+# def bbsSelectR():
+#     rdioLbl.grid_forget()
+#     rdioF.grid_forget()
+#     rdioR.grid_forget()
+#
+# ## Check Graphic or Exe result
+# bbsType = tk.IntVar()
+# bbsLbl = tk.Label(f_chk, text="프로그램 유형 선택 : ")
+# bbsGraphic = tk.Radiobutton(f_chk, text="그래픽", variable=bbsType, value=1, command=bbsSelectG)
+# bbsGraphic.select()
+# bbsGraphic.invoke()
+# bbsResult = tk.Radiobutton(f_chk, text="실행 결과", variable=bbsType, value=2, command=bbsSelectR)
+#
+# # bbsLbl.grid(row=0, column=0)
+# # bbsGraphic.grid(row=0, column=1)
+# # bbsResult.grid(row=0, column=2)
+#
+# targetType = None
+# rdioLbl = None
+# rdioF = None
+# rdioR = None
 
-
-def RdiotoRandom():
-    tCase.target = tCase.set_rand_target(tCase.total_time)
-    for t in tCase.target:
-        print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
-
-## Check
-radioValue = tk.IntVar()
-rdioLbl = tk.Label(f_chk, text="Select Target Type : ")
-rdioF = tk.Radiobutton(f_chk, text="Fixed", variable=radioValue, value=1, command=RdiotoFixed)
-rdioF.select()
-rdioR = tk.Radiobutton(f_chk, text="Random", variable=radioValue, value=2, command=RdiotoRandom)
-
-rdioLbl.grid(row=0, column=0)
-rdioF.grid(row=0, column=1)
-rdioR.grid(row=0, column=2)
 
 # Label
 head_lbl = tk.Label(f_lbl, text="Ship Info.")
@@ -173,8 +199,10 @@ def reset_info():
     store_time = 0
 
     btn_run['state'] = tk.NORMAL
-    rdioR['state'] = tk.NORMAL
-    rdioF['state'] = tk.NORMAL
+    typeChk.rdioR['state'] = tk.NORMAL
+    typeChk.rdioF['state'] = tk.NORMAL
+    typeChk.bbsGraphic['state'] = tk.NORMAL
+    typeChk.bbsResult['state'] = tk.NORMAL
     if btn_run['text'] == 'Stop':
         btn_run['text'] = 'Run'
 
@@ -185,8 +213,8 @@ def reset_info():
         for j in range(len(tCase.accum_time[i])):
             tCase.accum_time[i][j] = 0
 
-    if radioValue.get() == 2:
-        RdiotoRandom()
+    if typeChk.targetType.get() == 2:
+        typeChk.RdiotoRandom()
     else:
         tCase.target = copy.deepcopy(init_target)
     idata = read_file_formatting(tCase.patrol, tCase.target)
@@ -196,34 +224,38 @@ def reset_info():
 
     tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
-    for i in range(len(c_patrol)):
+    for i in range(len(cvs.c_patrol)):
         temp_x, temp_y = tCase.patrol[i].get_position()
-        temp_x, temp_y = converse(temp_x, temp_y)
+        temp_x, temp_y = cvs.converse(temp_x, temp_y)
         # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
 
-        canvas.coords(c_patrol[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
+        cvs.canvas.coords(cvs.c_patrol[i], temp_x - cvs.ship_r, temp_y - cvs.ship_r, temp_x + cvs.ship_r, temp_y + cvs.ship_r)
         # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
-        canvas.coords(c_patrol_detection[i], temp_x - (ratio * 5), temp_y - (ratio * 5))
-    for i in range(len(c_target)):
+        cvs.canvas.coords(cvs.c_patrol_detection[i], temp_x - (cvs.ratio * 5), temp_y - (cvs.ratio * 5))
+    for i in range(len(cvs.c_target)):
         temp_x, temp_y = tCase.target[i].get_position()
-        temp_x, temp_y = converse(temp_x, temp_y)
-        canvas.coords(c_target[i], temp_x - ship_r, temp_y - ship_r, temp_x + ship_r, temp_y + ship_r)
-    for i in range(len(c_patrol_detection_l)):
-        for j in range(len(c_patrol_detection_l[i])):
-            canvas.delete(c_patrol_detection_l[i][j])
-    #
-    # init_draw_patrol(tCase.patrol, tCase.target)
-    # init_draw_target(tCase.target)
+        temp_x, temp_y = cvs.converse(temp_x, temp_y)
+        cvs.canvas.coords(cvs.c_target[i], temp_x - cvs.ship_r, temp_y - cvs.ship_r, temp_x + cvs.ship_r, temp_y + cvs.ship_r)
+    for i in range(len(cvs.c_patrol_detection_l)):
+        for j in range(len(cvs.c_patrol_detection_l[i])):
+            cvs.canvas.delete(cvs.c_patrol_detection_l[i][j])
+
 
 
 def toggleBtn():
     global running
 
     if(btn_run['text']=='Run'):
-        rdioF['state'] = tk.DISABLED
-        rdioR['state'] = tk.DISABLED
-        btn_run['text']='Stop'
+        typeChk.rdioF['state'] = tk.DISABLED
+        typeChk.rdioR['state'] = tk.DISABLED
+        typeChk.bbsGraphic['state'] = tk.DISABLED
+        typeChk.bbsResult['state'] = tk.DISABLED
+        btn_run['text'] = 'Stop'
         running = 1
+
+        ## get setting val
+        tCase.set_info_data(info_t.data_t)
+        cvs.set_detection_range_img(tCase.patrol)
         run_canvas()
 
     elif(btn_run['text']=='Stop'):
@@ -257,6 +289,8 @@ tCase.set_fixed_unit(tCase.patrol, tCase.target)
 cvs = GUI.Canvas(frame_bbs, 400, 300, tCase)
 cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
+
+typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, cvs)
 
 
 btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)

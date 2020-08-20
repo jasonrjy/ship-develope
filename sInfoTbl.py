@@ -61,14 +61,25 @@ class Table:
                     lbl = Label(frame, text=property_data[i-1], width=10, bg="white")
                     lbl.grid(row=i, column=j)
                 ## path
-                elif j == row-1:
+                elif i == col-1:
                     sv = StringVar()
                     sv.set(data[j - 1][i - 1])
                     self.data_t[i - 1].append(sv)
                     # print("i = {}, j = {}".format(i, j))
                     # print(data_t[i-1][j-1])
-                    lbl = Label(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white", )
+                    lbl = Label(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white")
                     lbl.grid(row=i, column=j)
+
+                elif i == col-2 or i == col-3:
+                    sv = StringVar()
+                    sv.set(data[j - 1][i - 1])
+                    self.data_t[i - 1].append(sv)
+                    # print("i = {}, j = {}".format(i, j))
+                    # print(data_t[i-1][j-1])
+                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white", justify='center')
+                    ent.grid(row=i, column=j)
+                    vcmd = frame.register(self.callback)
+                    ent.config(validate='all', validatecommand=(vcmd, '%P'))
 
                 ## else data
                 else:
@@ -127,8 +138,22 @@ class Table:
         #     for j in range(len(self.data_t[i])):
         #         print(str(self.data_t[i][j].get()))
 
-
-
+    def callback(self, P):
+        # if input.isdigit():
+        #     print(input)
+        #     return True
+        #
+        # elif input is "":
+        #     print(input)
+        #     return True
+        #
+        # else:
+        #     print(input)
+        #     return False
+        if str.isdigit(P) or P == "":
+            return True
+        else:
+            return False
 
 
 

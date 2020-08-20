@@ -49,6 +49,12 @@ class CycleUnit:
       self.x = x
       self.y = y
 
+  def set_x(self, x):
+    self.x = x
+
+  def set_y(self, y):
+    self.y = y
+
   def set_speed(self, speed):
     self.speed = speed
 
@@ -82,6 +88,8 @@ class CycleUnit:
   def get_path(self):
     return self.path
 
+  def print_position(self):
+    print("x = {}, y = {}".format(self.x, self.y))
 
   def length_to_time(self, length):
     """

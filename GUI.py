@@ -33,6 +33,7 @@ class Canvas:
         self.init_count = 1
         self.init_total_time = copy.deepcopy(self.tCase.total_time)
         self.img = ImageTk.PhotoImage(Image.open('detection.png'))
+        self.images = []
 
         self.canvas = tk.Canvas(frame, width=w, height=h, bg="white")
         self.canvas.pack()
@@ -50,6 +51,8 @@ class Canvas:
         for i in range(len(patrol)):
             temp_x, temp_y = patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
+            self.images.append(self.img)
+            # print("oooorigin w = {}, h = {}".format(self.images[i].width(), self.images[i].height()))
 
             ## draw path
             for p in patrol:
@@ -67,7 +70,7 @@ class Canvas:
             self.c_patrol.append(temp_c)
             ## draw detection range
             temp_c = self.canvas.create_image(temp_x - (self.ratio * patrol[i].detection_dist),
-                                         temp_y - (self.ratio * patrol[i].detection_dist), image=self.img, anchor=tk.NW)
+                                         temp_y - (self.ratio * patrol[i].detection_dist), image=self.images[i], anchor=tk.NW)
             self.c_patrol_detection.append(temp_c)
 
         for i in range(len(patrol)):
@@ -94,7 +97,7 @@ class Canvas:
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
             self.canvas.coords(self.c_patrol[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
-            self.canvas.coords(self.c_patrol_detection[i], temp_x - (self.ratio * 5), temp_y - (self.ratio * 5))
+            self.canvas.coords(self.c_patrol_detection[i], temp_x - (self.ratio * self.tCase.patrol[i].detection_dist), temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
 
         ### draw detection line
         for i in range(len(self.tCase.patrol)):
@@ -111,3 +114,10 @@ class Canvas:
                 else:
                     self.canvas.delete(self.c_patrol_detection_l[i][j])
 
+    def set_detection_range_img(self, patrol):
+        for i in range(len(self.c_patrol_detection)):
+            im_temp = Image.open('detection.png')
+            n_pixel = self.ratio * patrol[i].detection_dist * 2
+            im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
+            self.images[i] = ImageTk.PhotoImage(im_temp)
+            self.canvas.itemconfigure(self.c_patrol_detection[i], image=self.images[i])

@@ -118,6 +118,13 @@ class testCase():
         for i in range(len(self.patrol)):
             self.total_accum_t.append(0)
 
+    def set_info_data(self, data):
+        for i in range(len(data[0])):
+            self.patrol[i].set_knot(int(data[-4][i].get()))
+            # print("before {}".format(self.patrol[i].detection_dist))
+            self.patrol[i].set_detection(int(data[-3][i].get()))
+            # print("after {}".format(self.patrol[i].detection_dist))
+
     def set_total_time(self, tt):
         self.total_time = tt
 
