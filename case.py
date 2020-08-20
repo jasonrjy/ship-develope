@@ -311,7 +311,7 @@ def cal_case(tt, cnt, p, t):
 
 
 def readFile():
-    file = open("사전 데이터 입력.txt", 'r', encoding="utf-8")
+    file = open("./data/사전 데이터 입력.txt", 'r', encoding="utf-8")
 
     patrol = []
     target = []

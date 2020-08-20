@@ -1,5 +1,4 @@
 from tkinter import *
-import case
 import copy
 
 ## reference https://www.geeksforgeeks.org/create-table-using-tkinter/

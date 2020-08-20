@@ -1,5 +1,4 @@
 from math import sqrt, isclose
-from decimal import Decimal
 import copy
 
 def interpolate(pos1, pos2, t):
