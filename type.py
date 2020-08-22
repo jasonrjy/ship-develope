@@ -47,6 +47,8 @@ class typeCheck:
         ## Result > Entry count
         self.countVal = tk.IntVar()
         self.countEntry = tk.Entry(frame,  width=10, textvariable=self.countVal, justify='center')
+        vcmd = frame.register(self.callback)
+        self.countEntry.config(validate='all', validatecommand=(vcmd, '%P'))
         self.printStr = tk.Label(frame, text=" 회")
         self.countVal.set(1)
 
@@ -84,3 +86,9 @@ class typeCheck:
 
         self.countEntry.grid(row=1, column=1,sticky=tk.E)
         self.printStr.grid(row=1, column=2, sticky=tk.W)
+
+    def callback(self, P):
+        if str.isdigit(P) or P == "":
+            return True
+        else:
+            return False

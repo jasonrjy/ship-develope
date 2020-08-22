@@ -350,6 +350,7 @@ def readFile():
         detect_dist = re.split(': ', temp)[1]
 
         patrol[i].set_knot(int(knot))
+
         path = re.split('; |, ', path_line)
         size = int(len(path) / 2)
         for j in range(size):
