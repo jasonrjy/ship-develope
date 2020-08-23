@@ -40,14 +40,35 @@ class CycleUnit:
     else:
       self.path.insert(self.num_path, [x, y]) #마지막 원소 바로 전에 삽입
     self.num_path = self.num_path + 1
+
     # 모든 경로의 길이 계산
     if self.num_path > 1:
-      self.length_list = []
-      for i in range(self.num_path):
-        self.length_list.append(distance(self.path[i], self.path[i + 1]))
+      self.update_length()
     else:
       self.x = x
       self.y = y
+
+  def update_length(self):
+    self.length_list = []
+    print(self.num_path)
+    for i in range(self.num_path):
+      print(self.path[i])
+      print(self.path[(i+1)%self.num_path])
+      self.length_list.append(distance(self.path[i], self.path[(i + 1)%self.num_path]))
+      print(self.length_list[i])
+      print("------")
+
+
+  def delete_path(self, path_idx):
+    if len(self.path) > 2:
+      self.path.remove(self.path[path_idx])
+      # for i in range(len(self.path)):
+      #   print("{} {}".format(self.path[i][0], self.path[i][1]))
+      self.num_path -= 1
+      self.update_length()
+      return True
+    else: return False
+
 
   def set_x(self, x):
     self.x = x

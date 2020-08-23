@@ -14,6 +14,8 @@ class Table:
 
         self.path_entry = []
         self.path_list = []
+        self.knot_entry = []
+        self.drange_entry = []
 
         # f_tbl = Frame(frame)
         # f_lbl = Frame(frame)
@@ -78,7 +80,9 @@ class Table:
                     for t in range(len(path)):
                         listBox.insert(t, path[t])
                     listBox.grid(row=i, column=j)
+                    # listBox.bind("<Delete>", lambda event, idx=j - 1: self.delete_path(event, idx))
                     self.path_list.append(listBox)
+
                 ## path entry
                 elif i == col-1:
                     ent = Entry(frame, width=10, bg="white", justify='center')
@@ -87,10 +91,10 @@ class Table:
                     vcmd = frame.register(self.callbackPath)
                     ent.config(validate='all', validatecommand=(vcmd, '%P', '%S'))
                     # ent.bind("<Return>", lambda: self.insert_path(self,  j - 1))
-                    ent.bind("<Return>", lambda event, idx=j-1: self.insert_path(event, idx))
+                    # ent.bind("<Return>", lambda event, idx=j-1: self.insert_path(event, idx))
 
-                ## knot, D_range
-                elif i == col-2 or i == col-3:
+                ## D_range
+                elif i == col - 3:
                     sv = StringVar()
                     sv.set(data[j - 1][i - 1])
                     self.data_t[i - 1].append(sv)
@@ -100,6 +104,19 @@ class Table:
                     ent.grid(row=i, column=j)
                     vcmd = frame.register(self.callback)
                     ent.config(validate='all', validatecommand=(vcmd, '%P'))
+                    self.drange_entry.append(ent)
+                ## knot
+                elif i == col - 4:
+                    sv = StringVar()
+                    sv.set(data[j - 1][i - 1])
+                    self.data_t[i - 1].append(sv)
+                    # print("i = {}, j = {}".format(i, j))
+                    # print(data_t[i-1][j-1])
+                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white", justify='center')
+                    ent.grid(row=i, column=j)
+                    vcmd = frame.register(self.callback)
+                    ent.config(validate='all', validatecommand=(vcmd, '%P'))
+                    self.knot_entry.append(ent)
 
                 ## else data
                 else:
@@ -183,10 +200,8 @@ class Table:
         else:
             return False
 
-    def insert_path(self, event, idx):
+    def insert_path_to_entry(self, event, idx):
         origin = self.path_entry[idx].get()
-        print(origin)
-        print(type(origin))
 
         input = re.split(', ', origin)
         if len(input) == 2:
@@ -195,7 +210,23 @@ class Table:
                 self.path_list[idx].insert(self.path_list[idx].size()-1, origin)
                 self.path_entry[idx].delete(0, 'end')
 
+    def delete_path(self, event, idx):
+        origin = self.path_list[idx]
 
+        selection = origin.curselection()
+        if selection:
+            origin.delete(selection)
+
+    def refresh_all_path(self):
+        ip = self.init_patrol
+        for i in range(len(ip)):
+            self.path_list[i].delete(0, 'end')
+            for j in range(len(ip[i].path)):
+                temp = ""
+                temp += str(ip[i].path[j][0])
+                temp += ", "
+                temp += str(ip[i].path[j][1])
+                self.path_list[i].insert(j, temp)
 
 
 

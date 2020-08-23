@@ -6,6 +6,7 @@ from PIL import Image, ImageTk, ImageDraw
 import sInfoTbl
 import GUI
 import type
+import re
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -166,7 +167,6 @@ def run_canvas():
 
     for i in range(store_time, int(tCase.total_time)):
         store_time = i
-        print(i)
         if running == 1:
             ## update time with position and return detection res
             res = tCase.update_time()
@@ -203,6 +203,11 @@ def reset_info():
     typeChk.rdioF['state'] = tk.NORMAL
     typeChk.bbsGraphic['state'] = tk.NORMAL
     typeChk.bbsResult['state'] = tk.NORMAL
+    for i in info_t.path_entry:
+        i['state'] = tk.NORMAL
+    for i in range(len(tCase.patrol)):
+        info_t.drange_entry[i]['state'] = tk.NORMAL
+        info_t.knot_entry[i]['state'] = tk.NORMAL
     if btn_run['text'] == 'Stop':
         btn_run['text'] = 'Run'
 
@@ -240,6 +245,14 @@ def reset_info():
         for j in range(len(cvs.c_patrol_detection_l[i])):
             cvs.canvas.delete(cvs.c_patrol_detection_l[i][j])
 
+    ## update for path
+    cvs.update_init_draw_patrol()
+    info_t.refresh_all_path()
+
+    for i in range(len(tCase.patrol)):
+        info_t.data_t[8][i].set(tCase.patrol[i].detection_dist)
+        info_t.data_t[7][i].set(tCase.patrol[i].knot)
+
 
 
 def toggleBtn():
@@ -250,11 +263,17 @@ def toggleBtn():
         typeChk.rdioR['state'] = tk.DISABLED
         typeChk.bbsGraphic['state'] = tk.DISABLED
         typeChk.bbsResult['state'] = tk.DISABLED
+        for i in info_t.path_entry:
+            i['state'] = tk.DISABLED
+        for i in range(len(tCase.patrol)):
+            info_t.drange_entry[i]['state'] = tk.DISABLED
+            info_t.knot_entry[i]['state'] = tk.DISABLED
+
         btn_run['text'] = 'Stop'
         running = 1
 
         ## get setting val
-        tCase.set_info_data(info_t.data_t)
+        tCase.set_info_data(info_t)
         cvs.set_detection_range_img(tCase.patrol)
         run_canvas()
 
@@ -271,6 +290,36 @@ def run_ready():
     print(running)
     return False
 
+def delete_path(event, idx):
+    global running
+    if running == -1:
+        origin = info_t.path_list[idx]
+
+        selection = origin.curselection()
+        # sel_val = origin.get(selection)
+        # sel_val = re.split(', ', sel_val)
+        # print(sel_val)
+        # print(selection[0])
+        if selection:
+            if tCase.patrol[idx].delete_path(selection[0]):
+                origin.delete(selection)
+                cvs.update_init_draw_patrol()
+
+
+def insert_path(event, idx):
+    global running
+    if running == -1:
+        origin = info_t.path_entry[idx].get()
+
+        input = re.split(', ', origin)
+        if len(input) == 2:
+            if str.isdigit(input[0]) and str.isdigit(input[1]):
+                tCase.patrol[idx].add_path(int(input[0]), int(input[1]))
+                info_t.path_list[idx].insert(info_t.path_list[idx].size() - 1, origin)
+                info_t.path_entry[idx].delete(0, 'end')
+        cvs.update_init_draw_patrol()
+
+
 
 ######## init setting section
 
@@ -284,6 +333,10 @@ init_total_time = copy.deepcopy(tCase.total_time)
 
 idata = read_file_formatting(tCase.patrol, tCase.target)
 info_t = sInfoTbl.Table(f_tbl, idata, tCase)
+for i in range(len(info_t.path_list)):
+    info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
+for i in range(len(info_t.path_entry)):
+    info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
 
 tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
