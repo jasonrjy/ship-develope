@@ -155,3 +155,10 @@ class Canvas:
             im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
             self.images[i] = ImageTk.PhotoImage(im_temp)
             self.canvas.itemconfigure(self.c_patrol_detection[i], image=self.images[i])
+
+
+class ResultText:
+    def __init__(self, frame, w, h):
+        self.data = []
+        self.text = tk.Text(frame, width=w, height=h, relief="solid", padx=5, pady=5)
+

@@ -222,7 +222,7 @@ def run_rand_case(tt, p):
         case.accum_t += case.time
 
     for i in range(len(case.patrol)):
-        print("Patrol {}'s detectioin".format(i))
+        print("Patrol {}'s detection".format(i))
         print(" total detection time = {}".format(case.total_accum_t[i]))
         for j in range(len(case.target)):
             print("  target {} : {}, ftime = {}".format(j, case.accum_time[i][j], case.ftime[i][j]), end='\n')
@@ -320,6 +320,71 @@ def cal_case(tt, cnt, p, t):
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
                                                                                 accum_detection_time[i] / cnt, tmp))
 
+def cal_case_write_text(tt, cnt, p, t, Res):
+    max_detection_time = []
+    accum_detection_time = []
+    find_count = [0, 0, 0]
+    max_target_list = []
+    txt = Res.text
+
+    # ### run rand case
+    run_p = copy.deepcopy(p)
+    case_res, case_target = run_rand_case(tt, run_p)
+
+    for i in range(3):
+        max_detection_time.append(case_res[i])
+        accum_detection_time.append(case_res[i])
+        max_target_list.append(case_target)
+        if case_res[i] > 0:
+            find_count[i] += 1
+
+    for i in range(cnt - 1):
+        run_p = copy.deepcopy(p)
+        case_res, case_target = run_rand_case(tt, run_p)
+
+        for j in range(3):
+            if (case_res[j] >= max_detection_time[j]):
+                max_detection_time[j] = case_res[j]
+                max_target_list[j] = case_target
+            accum_detection_time[j] += case_res[j]
+            if case_res[j] > 0:
+                find_count[j] += 1
+
+    ### print option
+    print("\n--------------------------\n\n총 탐색 시간 : {} 분".format(int(tt)))
+    print("탐색 속력 : {} Knot\n\n--------------------------\n".format(p[0].knot))
+    temp = "\n--------------------------\n\n총 탐색 시간 : {} 분\n".format(int(tt))
+    txt.insert(END, temp)
+    temp = "탐색 속력 : {} Knot\n".format(p[0].knot)
+    txt.insert(END, temp)
+
+    #  run fixed case with print
+    run_p = copy.deepcopy(p)
+    run_t = copy.deepcopy(t)
+    print("고정된 Target 실행 결과")
+    # temp = "\n고정된 Target 실행 결과\n"
+    # txt.insert(END, temp)
+    # case_res, case_target = run_fixed_case(tt, run_p, run_t)
+
+    #### print part
+    print("--------------------------\n\n{} 번의 임의 실행 결과\n".format(cnt))
+    temp = "\n--------------------------\n\n{} 번의 임의 실행 결과\n\n".format(cnt)
+    txt.insert(END, temp)
+    # for i in range(3):
+    #   print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
+    #   for j in range(3):
+    #     print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
+    #   print("\n")
+    for i in range(3):
+        tmp = int((100 * accum_detection_time[i] / cnt) / int(tt))
+        print("{}번 경로\n 최대 접촉 시간 : {}".format(i + 1, max_detection_time[i]))
+        temp = "{}번 경로\n 최대 접촉 시간 : {}\n".format(i + 1, max_detection_time[i])
+        txt.insert(END, temp)
+        print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
+                                                                                accum_detection_time[i] / cnt, tmp))
+        temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n\n".format(i + 1, cnt, find_count[i],
+                                                                                accum_detection_time[i] / cnt, tmp)
+        txt.insert(END, temp)
 
 def readFile():
     file = open("./data/사전 데이터 입력.txt", 'r', encoding="utf-8")

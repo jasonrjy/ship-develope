@@ -25,7 +25,7 @@ store_time = 0
 
 window = tk.Tk()
 window.title("Ship Detection Program")
-window.geometry("800x500")
+window.geometry("850x500")
 window.resizable(0, 0)
 
 frame_info = tk.Frame(window)
@@ -157,7 +157,6 @@ def read_file_formatting(patrol, target):
 
     return data
 
-
 def run_canvas():
     for t in tCase.target:
         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
@@ -192,6 +191,14 @@ def run_canvas():
     ## stop이 아니면 > 루프가 끝났다면
     if running != 0:
         btn_run['state'] = tk.DISABLED
+
+
+def run_result():
+    global running, store_time
+    running = 1
+    tt = 300
+    cnt = int(typeChk.countVal.get())
+    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText)
 
 def reset_info():
     global running, store_time
@@ -275,7 +282,10 @@ def toggleBtn():
         ## get setting val
         tCase.set_info_data(info_t)
         cvs.set_detection_range_img(tCase.patrol)
-        run_canvas()
+        if typeChk.bbsType.get() == 1:
+            run_canvas()
+        else:
+            run_result()
 
     elif(btn_run['text']=='Stop'):
         btn_run['text']='Run'
@@ -285,9 +295,7 @@ def toggleBtn():
 def run_ready():
     global running
     if running == 1:
-        print(running)
         return True
-    print(running)
     return False
 
 def delete_path(event, idx):
@@ -344,7 +352,10 @@ cvs = GUI.Canvas(frame_bbs, 400, 300, tCase)
 cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
 
-typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, cvs)
+resText = GUI.ResultText(frame_bbs, 75, 20)
+
+bbs = [cvs, resText]
+typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)
 
 
 btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)

@@ -79,6 +79,10 @@ class typeCheck:
         self.countEntry.grid_forget()
         self.printStr.grid_forget()
 
+        self.bbs[1].text.pack_forget()
+        self.bbs[0].canvas.pack()
+
+
     def bbsSelectR(self):
         self.rdioLbl.grid_forget()
         self.rdioF.grid_forget()
@@ -86,6 +90,10 @@ class typeCheck:
 
         self.countEntry.grid(row=1, column=1,sticky=tk.E)
         self.printStr.grid(row=1, column=2, sticky=tk.W)
+
+        print(self.bbs[0].canvas)
+        self.bbs[0].canvas.pack_forget()
+        self.bbs[1].text.pack()
 
     def callback(self, P):
         if str.isdigit(P) or P == "":

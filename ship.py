@@ -50,13 +50,8 @@ class CycleUnit:
 
   def update_length(self):
     self.length_list = []
-    print(self.num_path)
     for i in range(self.num_path):
-      print(self.path[i])
-      print(self.path[(i+1)%self.num_path])
       self.length_list.append(distance(self.path[i], self.path[(i + 1)%self.num_path]))
-      print(self.length_list[i])
-      print("------")
 
 
   def delete_path(self, path_idx):
@@ -154,7 +149,11 @@ class CycleUnit:
       idx = (idx + 1) % self.num_path
 
     #이제 idx는 현재 path의 index임. 시간을 0 ~ 1로 정규화 시킴.
-    unit_time = float(remain_time) / self.length_to_time(self.length_list[idx])
+    lt = self.length_to_time(self.length_list[idx])
+    if lt != 0:
+      unit_time = float(remain_time) / self.length_to_time(self.length_list[idx])
+    else:
+      unit_time = 0
     #보간 연산을 통해 현재 ship의 위치를 계산함.
     current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
     
