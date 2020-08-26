@@ -16,6 +16,8 @@ class Table:
         self.path_list = []
         self.knot_entry = []
         self.drange_entry = []
+        self.patrol_btn = []
+        self.patrol_btn_tg = []
 
         # f_tbl = Frame(frame)
         # f_lbl = Frame(frame)
@@ -56,11 +58,15 @@ class Table:
                 if i == 0 and j == 0:
                     lbl = Label(frame, text="", width=10, bg="white")
                     lbl.grid(row=i, column=j)
-                ## heading
+                ## heading_patrol
                 elif i == 0:
                     str_h = "Patrol"+str(j)
-                    lbl = Label(frame, text=str_h, width=10, bg="white")
-                    lbl.grid(row=i, column=j)
+                    self.patrol_btn_tg.append(True)
+                    btn = Button(frame, text=str_h, width=10, bg="white", relief="solid")
+                    # , command=lambda idx=j-1: self.headingToggle(idx)
+                    btn.grid(row=i, column=j)
+                    self.patrol_btn.append(btn)
+
                 ## property
                 elif j == 0:
                     ## path
@@ -127,6 +133,8 @@ class Table:
                     # print(data_t[i-1][j-1])
                     lbl = Label(frame, textvariable=self.data_t[i-1][j-1], width=10, bg="white")
                     lbl.grid(row=i, column=j)
+
+        # self.set_heading_func()
 
     def update_position(self, edit):
         for i in range(len(self.data_t[0])):
@@ -227,6 +235,24 @@ class Table:
                 temp += ", "
                 temp += str(ip[i].path[j][1])
                 self.path_list[i].insert(j, temp)
+
+    def set_heading_func(self):
+        for i in range(len(self.patrol_btn)):
+            print("!")
+            self.patrol_btn[i]['command'] = "lambda event, idx=i: headingToggle(event, idx)"
+            self.patrol_btn_tg.append(True)
+            print(self.patrol_btn[i]['command'])
+
+    def headingToggle(self, idx):
+        print(idx)
+        if self.patrol_btn_tg[idx]:
+            self.patrol_btn[idx]['background'] = "black"
+            self.patrol_btn[idx]['fg'] = "green"
+        else:
+            self.patrol_btn[idx]['background'] = "white"
+            self.patrol_btn[idx]['fg'] = "black"
+
+        self.patrol_btn_tg[idx] = not self.patrol_btn_tg[idx]
 
 
 

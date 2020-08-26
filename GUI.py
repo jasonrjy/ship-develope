@@ -12,6 +12,7 @@ class Canvas:
     c_patrol = []
     c_patrol_detection = []
     c_patrol_detection_l = []
+    c_patrol_path = []
     c_target = []
     tCase = None
     init_target = None
@@ -37,7 +38,14 @@ class Canvas:
 
         self.c_patrol_path = []
 
-        self.canvas = tk.Canvas(frame, width=w, height=h, bg="white")
+        self.canvas = tk.Canvas(frame, width=w, height=h, bg="black", relief="solid")
+        # op_x1 = 0
+        # op_x2 = 20
+        # op_y1 = 0
+        # op_y2 = 10
+        # op_x1, op_y1 = self.converse(op_x1, op_y1)
+        # op_x2, op_y2 = self.converse(op_x2, op_y2)
+        # # self.canvas.create_rectangle(op_x1, op_y1, op_x2, op_y2, fill="#d3d3d3")
         self.canvas.pack()
 
     def converse_x(self, x):
@@ -68,11 +76,11 @@ class Canvas:
                     y1 = self.converse_y(cur_path[j][1])
                     x2 = self.converse_x(cur_path[j + 1][0])
                     y2 = self.converse_y(cur_path[j + 1][1])
-                    line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="green")
+                    line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="#86c5e5")
                     self.c_patrol_path[idx].append(line)
             ## draw patrol
             temp_c = self.canvas.create_oval(temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r,
-                                        fill='green')
+                                        fill='green', outline="green")
             self.c_patrol.append(temp_c)
             ## draw detection range
             temp_c = self.canvas.create_image(temp_x - (self.ratio * patrol[i].detection_dist),
@@ -116,7 +124,7 @@ class Canvas:
                     x2, y2 = self.converse(x2, y2)
 
                     self.canvas.delete(self.c_patrol_detection_l[i][j])
-                    self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2))
+                    self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2), fill="white")
                 else:
                     self.canvas.delete(self.c_patrol_detection_l[i][j])
 

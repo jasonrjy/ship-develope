@@ -143,7 +143,7 @@ class CycleUnit:
 
     #남은 시간이 현재 경로의 시간보다 클때,
     while remain_time > self.length_to_time(self.length_list[idx]):
-      #남은 시간에 현재 경로의 시간을 차감함.
+      #남은 시간에 현재 경로의 시간을 차감 함.
       remain_time = remain_time - self.length_to_time(self.length_list[idx])
       #경로 index를 1 증가시킴
       idx = (idx + 1) % self.num_path

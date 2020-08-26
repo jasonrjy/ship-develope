@@ -25,11 +25,11 @@ store_time = 0
 
 window = tk.Tk()
 window.title("Ship Detection Program")
-window.geometry("850x500")
+window.geometry("900x500")
 window.resizable(0, 0)
 
 frame_info = tk.Frame(window)
-frame_bbs = tk.Frame(window)
+frame_bbs = tk.Frame(window, padx=10, pady=10)
 frame_btn = tk.Frame(window)
 
 # frame_canvas.pack(side="left", fill="both")
@@ -328,6 +328,33 @@ def insert_path(event, idx):
         cvs.update_init_draw_patrol()
 
 
+def set_heading_func():
+    for i in range(len(info_t.patrol_btn)):
+        print("!")
+        info_t.patrol_btn[i].config(command=lambda idx=i: headingToggle(idx))
+        print(info_t.patrol_btn[i]['command'])
+
+
+def headingToggle(idx):
+    print(idx)
+    if info_t.patrol_btn_tg[idx]:
+        info_t.patrol_btn[idx]['background'] = "black"
+        info_t.patrol_btn[idx]['fg'] = "green"
+        for i in range(len(cvs.c_patrol_path[idx])):
+            cvs.canvas.itemconfigure(cvs.c_patrol_path[idx][i], state=tk.HIDDEN)
+        cvs.canvas.itemconfigure(cvs.c_patrol[idx], state=tk.HIDDEN)
+        cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], state=tk.HIDDEN)
+    else:
+        info_t.patrol_btn[idx]['background'] = "white"
+        info_t.patrol_btn[idx]['fg'] = "black"
+        for i in range(len(cvs.c_patrol_path[idx])):
+            cvs.canvas.itemconfigure(cvs.c_patrol_path[idx][i], state=tk.NORMAL)
+        cvs.canvas.itemconfigure(cvs.c_patrol[idx], state=tk.NORMAL)
+        cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], state=tk.NORMAL)
+
+    info_t.patrol_btn_tg[idx] = not info_t.patrol_btn_tg[idx]
+
+
 
 ######## init setting section
 
@@ -345,14 +372,15 @@ for i in range(len(info_t.path_list)):
     info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
 for i in range(len(info_t.path_entry)):
     info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
+set_heading_func()
 
 tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
-cvs = GUI.Canvas(frame_bbs, 400, 300, tCase)
+cvs = GUI.Canvas(frame_bbs, 550, 400, tCase)
 cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
 
-resText = GUI.ResultText(frame_bbs, 75, 20)
+resText = GUI.ResultText(frame_bbs, 75, 25)
 
 bbs = [cvs, resText]
 typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)
