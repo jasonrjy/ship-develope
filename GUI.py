@@ -106,7 +106,7 @@ class Canvas:
             temp_x, temp_y = self.converse(temp_x, temp_y)
             self.canvas.coords(self.c_target[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
 
-    def update_draw_patrol(self, res):
+    def update_draw_patrol(self, res, patrol_tg):
         for i in range(len(self.tCase.patrol)):
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
@@ -115,18 +115,19 @@ class Canvas:
 
         ### draw detection line
         for i in range(len(self.tCase.patrol)):
-            for j in range(len(self.tCase.target)):
-                if res[i][j] != -1:
-                    # print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
-                    x1, y1 = self.tCase.patrol[i].get_position()
-                    x1, y1 = self.converse(x1, y1)
-                    x2, y2 = self.tCase.target[j].get_position()
-                    x2, y2 = self.converse(x2, y2)
+            if patrol_tg[i]:
+                for j in range(len(self.tCase.target)):
+                    if res[i][j] != -1:
+                        # print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
+                        x1, y1 = self.tCase.patrol[i].get_position()
+                        x1, y1 = self.converse(x1, y1)
+                        x2, y2 = self.tCase.target[j].get_position()
+                        x2, y2 = self.converse(x2, y2)
 
-                    self.canvas.delete(self.c_patrol_detection_l[i][j])
-                    self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2), fill="white")
-                else:
-                    self.canvas.delete(self.c_patrol_detection_l[i][j])
+                        self.canvas.delete(self.c_patrol_detection_l[i][j])
+                        self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2), fill="white")
+                    else:
+                        self.canvas.delete(self.c_patrol_detection_l[i][j])
 
     def update_init_draw_patrol(self):
 
@@ -152,7 +153,7 @@ class Canvas:
                 y1 = self.converse_y(cur_path[j][1])
                 x2 = self.converse_x(cur_path[j + 1][0])
                 y2 = self.converse_y(cur_path[j + 1][1])
-                line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="green")
+                line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="#86c5e5")
                 self.c_patrol_path[i].append(line)
 
 
@@ -163,6 +164,21 @@ class Canvas:
             im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
             self.images[i] = ImageTk.PhotoImage(im_temp)
             self.canvas.itemconfigure(self.c_patrol_detection[i], image=self.images[i])
+
+
+    def update_detection_range_img(self, event, ent, idx):
+        print("run")
+        im_temp = Image.open('detection.png')
+        n_pixel = self.ratio * self.tCase.patrol[idx].detection_dist * 2
+
+        print(self.tCase.patrol[idx].detection_dist)
+        self.tCase.patrol[idx].detection_dist = int(ent.get())
+        print(self.tCase.patrol[idx].detection_dist)
+
+        im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
+        self.images[idx] = ImageTk.PhotoImage(im_temp)
+        self.canvas.itemconfigure(self.c_patrol_detection[idx], image=self.images[idx])
+
 
 
 class ResultText:

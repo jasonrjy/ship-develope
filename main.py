@@ -158,6 +158,8 @@ def read_file_formatting(patrol, target):
     return data
 
 def run_canvas():
+    if typeChk.targetType == 2:
+        tCase.target = tCase.set_rand_target(tCase.total_time)
     for t in tCase.target:
         print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
 
@@ -174,7 +176,7 @@ def run_canvas():
             # re-draw target
             cvs.update_draw_target()
             # re-draw patrol with detection range and detection line
-            cvs.update_draw_patrol(res)
+            cvs.update_draw_patrol(res, info_t.patrol_btn_tg)
             # update x,y
             info_t.update_position(patrol_all_p)
             info_t.update_now_detection(res)
@@ -215,6 +217,7 @@ def reset_info():
     for i in range(len(tCase.patrol)):
         info_t.drange_entry[i]['state'] = tk.NORMAL
         info_t.knot_entry[i]['state'] = tk.NORMAL
+        info_t.patrol_btn[i]['state'] = tk.NORMAL
     if btn_run['text'] == 'Stop':
         btn_run['text'] = 'Run'
 
@@ -243,6 +246,8 @@ def reset_info():
 
         cvs.canvas.coords(cvs.c_patrol[i], temp_x - cvs.ship_r, temp_y - cvs.ship_r, temp_x + cvs.ship_r, temp_y + cvs.ship_r)
         # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
+        ## init size c_patrol_detection
+        cvs.set_detection_range_img(tCase.patrol)
         cvs.canvas.coords(cvs.c_patrol_detection[i], temp_x - (cvs.ratio * 5), temp_y - (cvs.ratio * 5))
     for i in range(len(cvs.c_target)):
         temp_x, temp_y = tCase.target[i].get_position()
@@ -260,6 +265,12 @@ def reset_info():
         info_t.data_t[8][i].set(tCase.patrol[i].detection_dist)
         info_t.data_t[7][i].set(tCase.patrol[i].knot)
 
+    ## reset patrol tg
+    btn_tg = info_t.patrol_btn_tg
+    for i in range(len(btn_tg)):
+        btn_tg[i] = False
+        headingToggle(i)
+
 
 
 def toggleBtn():
@@ -275,6 +286,7 @@ def toggleBtn():
         for i in range(len(tCase.patrol)):
             info_t.drange_entry[i]['state'] = tk.DISABLED
             info_t.knot_entry[i]['state'] = tk.DISABLED
+            info_t.patrol_btn[i]['state'] = tk.DISABLED
 
         btn_run['text'] = 'Stop'
         running = 1
@@ -330,16 +342,15 @@ def insert_path(event, idx):
 
 def set_heading_func():
     for i in range(len(info_t.patrol_btn)):
-        print("!")
         info_t.patrol_btn[i].config(command=lambda idx=i: headingToggle(idx))
-        print(info_t.patrol_btn[i]['command'])
 
 
 def headingToggle(idx):
     print(idx)
+    ## false
     if info_t.patrol_btn_tg[idx]:
         info_t.patrol_btn[idx]['background'] = "black"
-        info_t.patrol_btn[idx]['fg'] = "green"
+        info_t.patrol_btn[idx]['fg'] = "lightgray"
         for i in range(len(cvs.c_patrol_path[idx])):
             cvs.canvas.itemconfigure(cvs.c_patrol_path[idx][i], state=tk.HIDDEN)
         cvs.canvas.itemconfigure(cvs.c_patrol[idx], state=tk.HIDDEN)
@@ -355,6 +366,21 @@ def headingToggle(idx):
     info_t.patrol_btn_tg[idx] = not info_t.patrol_btn_tg[idx]
 
 
+def update_detection_range_img(event, ent, idx):
+    im_temp = Image.open('detection.png')
+    tCase.patrol[idx].detection_dist = int(ent.get())
+    n_pixel = cvs.ratio * tCase.patrol[idx].detection_dist * 2
+
+    im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
+    cvs.images[idx] = ImageTk.PhotoImage(im_temp)
+    cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], image=cvs.images[idx])
+
+    temp_x, temp_y = tCase.patrol[idx].get_position()
+    temp_x, temp_y = cvs.converse(temp_x, temp_y)
+    cvs.canvas.coords(cvs.c_patrol_detection[idx], temp_x - (cvs.ratio * cvs.tCase.patrol[idx].detection_dist),
+                       temp_y - (cvs.ratio * cvs.tCase.patrol[idx].detection_dist))
+
+
 
 ######## init setting section
 
@@ -368,11 +394,7 @@ init_total_time = copy.deepcopy(tCase.total_time)
 
 idata = read_file_formatting(tCase.patrol, tCase.target)
 info_t = sInfoTbl.Table(f_tbl, idata, tCase)
-for i in range(len(info_t.path_list)):
-    info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
-for i in range(len(info_t.path_entry)):
-    info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
-set_heading_func()
+
 
 tCase.set_fixed_unit(tCase.patrol, tCase.target)
 
@@ -390,6 +412,16 @@ btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, com
 btn_reset.grid(row=0, column=0, pady=10, padx=5)
 btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=toggleBtn)
 btn_run.grid(row=0, column=1, pady=10, padx=5)
+
+for i in range(len(info_t.path_list)):
+    info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
+for i in range(len(info_t.path_entry)):
+    info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
+for i in range(len(info_t.drange_entry)):
+    info_t.drange_entry[i].bind("<Return>", lambda event, ent=info_t.drange_entry[i], idx=i: update_detection_range_img(event, ent, idx))
+
+# print(cvs.set_detection_range_img(tCase.patrol))
+set_heading_func()
 
 
 window.update()

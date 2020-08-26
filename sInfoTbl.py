@@ -236,23 +236,5 @@ class Table:
                 temp += str(ip[i].path[j][1])
                 self.path_list[i].insert(j, temp)
 
-    def set_heading_func(self):
-        for i in range(len(self.patrol_btn)):
-            print("!")
-            self.patrol_btn[i]['command'] = "lambda event, idx=i: headingToggle(event, idx)"
-            self.patrol_btn_tg.append(True)
-            print(self.patrol_btn[i]['command'])
-
-    def headingToggle(self, idx):
-        print(idx)
-        if self.patrol_btn_tg[idx]:
-            self.patrol_btn[idx]['background'] = "black"
-            self.patrol_btn[idx]['fg'] = "green"
-        else:
-            self.patrol_btn[idx]['background'] = "white"
-            self.patrol_btn[idx]['fg'] = "black"
-
-        self.patrol_btn_tg[idx] = not self.patrol_btn_tg[idx]
-
 
 
