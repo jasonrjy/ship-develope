@@ -124,7 +124,7 @@ class Table:
                     self.data_t[i - 1].append(sv)
                     # print("i = {}, j = {}".format(i, j))
                     # print(data_t[i-1][j-1])
-                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white", justify='center')
+                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, background="white", justify='center')
                     ent.grid(row=i, column=j)
                     vcmd = frame.register(self.callback)
                     ent.config(validate='all', validatecommand=(vcmd, '%P'))
@@ -137,7 +137,7 @@ class Table:
                     self.data_t[i - 1].append(sv)
                     # print("i = {}, j = {}".format(i, j))
                     # print(data_t[i-1][j-1])
-                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, bg="white", justify='center')
+                    ent = Entry(frame, textvariable=self.data_t[i - 1][j - 1], width=10, background="white", justify='center')
                     ent.grid(row=i, column=j)
                     vcmd = frame.register(self.callback)
                     ent.config(validate='all', validatecommand=(vcmd, '%P'))
@@ -261,7 +261,8 @@ class Table:
                 self.path_list[i].insert(j, temp)
 
     def target_off(self, idx):
-        for i in range(len(self.tbl[0])):
+        num = len(self.tbl[0])
+        for i in range(num):
             cur = self.tbl[idx+5][i]
             if cur['background'] == "#808080":
                 cur.configure(background="#666666", fg="#a0a0a0")
@@ -277,19 +278,25 @@ class Table:
                 cur.configure(background="white", fg="black")
 
     def patrol_off(self, idx):
-        for i in range(len(self.tbl)):
+        num = len(self.tbl)
+        for i in range(num):
             cur = self.tbl[i][idx + 1]
             if cur['background'] == "#808080":
                 cur.configure(background="#666666", fg="#a0a0a0")
             else:
+                if i in [num-4, num-3, num-1]:
+                    cur.configure(disabledbackground="#808080")
                 cur.configure(background="#808080", fg="#a0a0a0")
 
     def patrol_on(self, idx):
-        for i in range(len(self.tbl)):
+        num = len(self.tbl)
+        for i in range(num):
             cur = self.tbl[i][idx+1]
             if cur['background'] == "#666666":
                 cur.configure(background="#808080", fg="#a0a0a0")
             else:
+                if i in [num-4, num-3, num-1]:
+                    cur.configure(disabledbackground="SystemButtonFace")
                 cur.configure(background="white", fg="black")
             # self.frame.grid_columnconfigure(idx, background= "white", fg="black")
 

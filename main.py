@@ -182,7 +182,11 @@ def run_canvas():
             info_t.update_now_detection(res)
             info_t.update_res_detection(tCase)
 
+            print(info_t.tbl[8][1]['disabledbackground'])
+            # info_t.tbl[8][1].configure(disabledbackground="#666666")
+            print(info_t.tbl[8][1]['disabledbackground'])
             window.update()
+            print(info_t.tbl[8][1]['background'])
             time.sleep(0.03)
         else:
             return i
