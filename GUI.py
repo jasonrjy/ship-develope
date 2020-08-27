@@ -100,13 +100,14 @@ class Canvas:
             temp_c = self.canvas.create_oval(temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r, fill='red')
             self.c_target.append(temp_c)
 
-    def update_draw_target(self):
+    def update_draw_target(self, target_tg):
         for i in range(len(self.tCase.target)):
-            temp_x, temp_y = self.tCase.target[i].get_position()
-            temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.canvas.coords(self.c_target[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
+            if target_tg[i]:
+                temp_x, temp_y = self.tCase.target[i].get_position()
+                temp_x, temp_y = self.converse(temp_x, temp_y)
+                self.canvas.coords(self.c_target[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
 
-    def update_draw_patrol(self, res, patrol_tg):
+    def update_draw_patrol(self, res, patrol_tg, target_tg):
         for i in range(len(self.tCase.patrol)):
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
@@ -117,6 +118,7 @@ class Canvas:
         for i in range(len(self.tCase.patrol)):
             if patrol_tg[i]:
                 for j in range(len(self.tCase.target)):
+                    if not target_tg[j]: continue
                     if res[i][j] != -1:
                         # print("i : {}, j : {} >> {} ".format(i, j, res[i][j]))
                         x1, y1 = self.tCase.patrol[i].get_position()

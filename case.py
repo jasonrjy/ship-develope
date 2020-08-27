@@ -26,18 +26,20 @@ class testCase():
             data.append(t_data)
         return data
 
-    def update_time(self):
+    def update_time(self, patrol_tg, target_tg):
         ## coordinate change after self.time
 
         detect = [[0 for col in range(len(self.patrol))] for row in range(len(self.target))]
 
         for i in range(len(self.patrol)):
-            self.patrol[i].advance(self.time)
+            if patrol_tg[i]:
+                self.patrol[i].advance(self.time)
         #   print("Patrol {} Position at time {} is".format(i, self.patrol[i].time), end=' ')
         #   print(" {0} {1}".format(self.patrol[i].x, self.patrol[i].y), end='\n')
         # print("\n")
         for j in range(len(self.target)):
-            self.target[j].advance(self.time)
+            if target_tg[j]:
+                self.target[j].advance(self.time)
         #   print("Target {} Position at time {} is".format(j, self.target[j].time), end=' ')
         #   print(" {0} {1}".format(self.target[j].x, self.target[j].y), end='\n')
         # print("---------------------------------------")
@@ -63,8 +65,10 @@ class testCase():
         #         # print("find num = {}\n".format(find))
 
         for i in range(len(self.patrol)):
+            if not patrol_tg[i]: continue
             find = 0
             for j in range(len(self.target)):
+                if not target_tg[j]: continue
                 dist = ship.distance(self.patrol[i].get_position(), self.target[j].get_position())
                 if dist <= self.patrol[i].detection_dist:
                     detect[i][j] = dist
@@ -208,7 +212,7 @@ class testCase():
         return self.target
 
 
-def run_rand_case(tt, p):
+def run_rand_case(tt, p, p_tg, t_tg):
     case = testCase()
     case.set_rand_unit(p, tt)
     case.set_total_time(tt)
@@ -218,13 +222,15 @@ def run_rand_case(tt, p):
         print(" target {} >> x = {}, y = {}".format(i, case.target[i].path[0][0], case.target[i].path[0][1]))
 
     while case.accum_t < case.total_time:
-        case.update_time()
+        case.update_time(p_tg, t_tg)
         case.accum_t += case.time
 
     for i in range(len(case.patrol)):
+        if not p_tg[i]: continue
         print("Patrol {}'s detection".format(i))
         print(" total detection time = {}".format(case.total_accum_t[i]))
         for j in range(len(case.target)):
+            if not t_tg[j]: continue
             print("  target {} : {}, ftime = {}".format(j, case.accum_time[i][j], case.ftime[i][j]), end='\n')
 
     res = []
@@ -320,7 +326,7 @@ def cal_case(tt, cnt, p, t):
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
                                                                                 accum_detection_time[i] / cnt, tmp))
 
-def cal_case_write_text(tt, cnt, p, t, Res):
+def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg):
     max_detection_time = []
     accum_detection_time = []
     find_count = [0, 0, 0]
@@ -329,7 +335,7 @@ def cal_case_write_text(tt, cnt, p, t, Res):
 
     # ### run rand case
     run_p = copy.deepcopy(p)
-    case_res, case_target = run_rand_case(tt, run_p)
+    case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
 
     for i in range(3):
         max_detection_time.append(case_res[i])
@@ -340,7 +346,7 @@ def cal_case_write_text(tt, cnt, p, t, Res):
 
     for i in range(cnt - 1):
         run_p = copy.deepcopy(p)
-        case_res, case_target = run_rand_case(tt, run_p)
+        case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
 
         for j in range(3):
             if (case_res[j] >= max_detection_time[j]):
@@ -375,14 +381,15 @@ def cal_case_write_text(tt, cnt, p, t, Res):
     #   for j in range(3):
     #     print(" target {} >> x = {}, y = {}".format(j+1,max_target_list[i][j].path[0][0], max_target_list[i][j].path[0][1]))
     #   print("\n")
-    for i in range(3):
+    for i in range(len(p)):
+        if not p_tg[i]: continue
         tmp = int((100 * accum_detection_time[i] / cnt) / int(tt))
         print("{}번 경로\n 최대 접촉 시간 : {}".format(i + 1, max_detection_time[i]))
         temp = "{}번 경로\n 최대 접촉 시간 : {}\n".format(i + 1, max_detection_time[i])
         txt.insert(END, temp)
-        print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
+        print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, find_count[i], cnt,
                                                                                 accum_detection_time[i] / cnt, tmp))
-        temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n\n".format(i + 1, cnt, find_count[i],
+        temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n\n".format(i + 1, find_count[i], cnt,
                                                                                 accum_detection_time[i] / cnt, tmp)
         txt.insert(END, temp)
 

@@ -170,13 +170,13 @@ def run_canvas():
         store_time = i
         if running == 1:
             ## update time with position and return detection res
-            res = tCase.update_time()
+            res = tCase.update_time(info_t.patrol_btn_tg, info_t.target_btn_tg)
             # get now patrol position to list
             patrol_all_p = tCase.get_all_position()
             # re-draw target
-            cvs.update_draw_target()
+            cvs.update_draw_target(info_t.target_btn_tg)
             # re-draw patrol with detection range and detection line
-            cvs.update_draw_patrol(res, info_t.patrol_btn_tg)
+            cvs.update_draw_patrol(res, info_t.patrol_btn_tg, info_t.target_btn_tg)
             # update x,y
             info_t.update_position(patrol_all_p)
             info_t.update_now_detection(res)
@@ -200,7 +200,7 @@ def run_result():
     running = 1
     tt = 300
     cnt = int(typeChk.countVal.get())
-    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText)
+    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText, info_t.patrol_btn_tg, info_t.target_btn_tg)
 
 def reset_info():
     global running, store_time
@@ -217,7 +217,10 @@ def reset_info():
     for i in range(len(tCase.patrol)):
         info_t.drange_entry[i]['state'] = tk.NORMAL
         info_t.knot_entry[i]['state'] = tk.NORMAL
+        info_t.path_list[i]['state'] = tk.NORMAL
+        info_t.path_entry[i]['state'] = tk.NORMAL
         info_t.patrol_btn[i]['state'] = tk.NORMAL
+        info_t.target_btn[i]['state'] = tk.NORMAL
     if btn_run['text'] == 'Stop':
         btn_run['text'] = 'Run'
 
@@ -269,8 +272,13 @@ def reset_info():
     btn_tg = info_t.patrol_btn_tg
     for i in range(len(btn_tg)):
         btn_tg[i] = False
-        headingToggle(i)
+        heading_patrol_toggle(i)
 
+    ## reset target tgg
+    btn_tg = info_t.target_btn_tg
+    for i in range(len(btn_tg)):
+        btn_tg[i] = False
+        property_target_toggle(i)
 
 
 def toggleBtn():
@@ -286,7 +294,10 @@ def toggleBtn():
         for i in range(len(tCase.patrol)):
             info_t.drange_entry[i]['state'] = tk.DISABLED
             info_t.knot_entry[i]['state'] = tk.DISABLED
+            info_t.path_list[i]['state'] = tk.DISABLED
+            info_t.path_entry[i]['state'] = tk.DISABLED
             info_t.patrol_btn[i]['state'] = tk.DISABLED
+            info_t.target_btn[i]['state'] = tk.DISABLED
 
         btn_run['text'] = 'Stop'
         running = 1
@@ -342,28 +353,47 @@ def insert_path(event, idx):
 
 def set_heading_func():
     for i in range(len(info_t.patrol_btn)):
-        info_t.patrol_btn[i].config(command=lambda idx=i: headingToggle(idx))
+        info_t.patrol_btn[i].config(command=lambda idx=i: heading_patrol_toggle(idx))
 
 
-def headingToggle(idx):
-    print(idx)
+def set_property_func():
+    for i in range(len(info_t.target_btn)):
+        info_t.target_btn[i].config(command=lambda idx=i: property_target_toggle(idx))
+
+
+def heading_patrol_toggle(idx):
     ## false
     if info_t.patrol_btn_tg[idx]:
-        info_t.patrol_btn[idx]['background'] = "black"
-        info_t.patrol_btn[idx]['fg'] = "lightgray"
+        info_t.patrol_btn[idx]['background'] = "#808080"
+        info_t.patrol_btn[idx]['fg'] = "#a0a0a0"
         for i in range(len(cvs.c_patrol_path[idx])):
             cvs.canvas.itemconfigure(cvs.c_patrol_path[idx][i], state=tk.HIDDEN)
         cvs.canvas.itemconfigure(cvs.c_patrol[idx], state=tk.HIDDEN)
         cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], state=tk.HIDDEN)
+        info_t.patrol_off(idx)
     else:
         info_t.patrol_btn[idx]['background'] = "white"
-        info_t.patrol_btn[idx]['fg'] = "black"
+        info_t.patrol_btn[idx]['fg'] = "blue"
         for i in range(len(cvs.c_patrol_path[idx])):
             cvs.canvas.itemconfigure(cvs.c_patrol_path[idx][i], state=tk.NORMAL)
         cvs.canvas.itemconfigure(cvs.c_patrol[idx], state=tk.NORMAL)
         cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], state=tk.NORMAL)
+        info_t.patrol_on(idx)
 
     info_t.patrol_btn_tg[idx] = not info_t.patrol_btn_tg[idx]
+
+def property_target_toggle(idx):
+    ## false
+    if info_t.target_btn_tg[idx]:
+        info_t.target_btn[idx]['background'] = "#808080"
+        info_t.target_btn[idx]['fg'] = "#a0a0a0"
+        info_t.target_off(idx)
+    else:
+        info_t.target_btn[idx]['background'] = "white"
+        info_t.target_btn[idx]['fg'] = "blue"
+        info_t.target_on(idx)
+
+    info_t.target_btn_tg[idx] = not info_t.target_btn_tg[idx]
 
 
 def update_detection_range_img(event, ent, idx):
@@ -422,12 +452,11 @@ for i in range(len(info_t.drange_entry)):
 
 # print(cvs.set_detection_range_img(tCase.patrol))
 set_heading_func()
+set_property_func()
 
 
 window.update()
 
-########
-# run_canvas()
 
 
 #

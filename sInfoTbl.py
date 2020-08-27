@@ -7,17 +7,22 @@ class Table:
 
     def __init__(self, frame, data, tCase):
 
+        self.frame = frame
         self.init_patrol = copy.deepcopy(tCase.patrol)
         self.init_target = copy.deepcopy(tCase.target)
         self.tCase = tCase
         self.target = copy.copy(tCase.target)
 
+        self.tbl = []
         self.path_entry = []
         self.path_list = []
         self.knot_entry = []
         self.drange_entry = []
         self.patrol_btn = []
         self.patrol_btn_tg = []
+
+        self.target_btn = []
+        self.target_btn_tg = []
 
         # f_tbl = Frame(frame)
         # f_lbl = Frame(frame)
@@ -53,32 +58,45 @@ class Table:
         self.data_t = []
         for i in range(col):
             self.data_t.append([])
+            self.tbl.append([])
             for j in range(row):
                 ## first
                 if i == 0 and j == 0:
                     lbl = Label(frame, text="", width=10, bg="white")
                     lbl.grid(row=i, column=j)
+                    self.tbl[i].append(lbl)
                 ## heading_patrol
                 elif i == 0:
                     str_h = "Patrol"+str(j)
                     self.patrol_btn_tg.append(True)
-                    btn = Button(frame, text=str_h, width=10, bg="white", relief="solid")
+                    btn = Button(frame, text=str_h, width=10, bg="white", fg="blue")
                     # , command=lambda idx=j-1: self.headingToggle(idx)
                     btn.grid(row=i, column=j)
                     self.patrol_btn.append(btn)
-
+                    self.tbl[i].append(btn)
                 ## property
                 elif j == 0:
                     ## path
                     if i == col - 2:
                         lbl = Label(frame, text=property_data[i - 1], height=5, width=10, bg="white")
                         lbl.grid(row=i, column=j)
+                        self.tbl[i].append(lbl)
+                    ## add_path
                     elif i >= col - 1:
                         lbl = Label(frame, text="Add Path", width=10, bg="white")
                         lbl.grid(row=i, column=j)
+                        self.tbl[i].append(lbl)
+                    ## target btn
+                    elif i >= 5 and i <= (5 + option_num_data-1):
+                        self.target_btn_tg.append(True)
+                        btn = Button(frame, text=property_data[i-1], width=10, bg="white", fg="blue")
+                        btn.grid(row=i, column=j)
+                        self.target_btn.append(btn)
+                        self.tbl[i].append(btn)
                     else:
                         lbl = Label(frame, text=property_data[i-1], width=10, bg="white")
                         lbl.grid(row=i, column=j)
+                        self.tbl[i].append(lbl)
                 ## path
                 elif i == col-2:
                     listBox = Listbox(frame, bg="white", height=5, width=10, justify=CENTER)
@@ -88,7 +106,7 @@ class Table:
                     listBox.grid(row=i, column=j)
                     # listBox.bind("<Delete>", lambda event, idx=j - 1: self.delete_path(event, idx))
                     self.path_list.append(listBox)
-
+                    self.tbl[i].append(listBox)
                 ## path entry
                 elif i == col-1:
                     ent = Entry(frame, width=10, bg="white", justify='center')
@@ -98,7 +116,7 @@ class Table:
                     ent.config(validate='all', validatecommand=(vcmd, '%P', '%S'))
                     # ent.bind("<Return>", lambda: self.insert_path(self,  j - 1))
                     # ent.bind("<Return>", lambda event, idx=j-1: self.insert_path(event, idx))
-
+                    self.tbl[i].append(ent)
                 ## D_range
                 elif i == col - 3:
                     sv = StringVar()
@@ -111,6 +129,7 @@ class Table:
                     vcmd = frame.register(self.callback)
                     ent.config(validate='all', validatecommand=(vcmd, '%P'))
                     self.drange_entry.append(ent)
+                    self.tbl[i].append(ent)
                 ## knot
                 elif i == col - 4:
                     sv = StringVar()
@@ -123,6 +142,7 @@ class Table:
                     vcmd = frame.register(self.callback)
                     ent.config(validate='all', validatecommand=(vcmd, '%P'))
                     self.knot_entry.append(ent)
+                    self.tbl[i].append(ent)
 
                 ## else data
                 else:
@@ -133,6 +153,7 @@ class Table:
                     # print(data_t[i-1][j-1])
                     lbl = Label(frame, textvariable=self.data_t[i-1][j-1], width=10, bg="white")
                     lbl.grid(row=i, column=j)
+                    self.tbl[i].append(lbl)
 
         # self.set_heading_func()
 
@@ -146,8 +167,11 @@ class Table:
         for i in range(len(self.data_t[0])):
             now_d = ""
             count_none = 0
+            if not self.patrol_btn_tg[i]:
+                continue
             num = len(data[i])
             for j in range(num):
+                if not self.target_btn_tg[j]: continue
                 if data[i][j] != -1:
                     count_none += 1
                     if count_none != 1:
@@ -235,6 +259,41 @@ class Table:
                 temp += ", "
                 temp += str(ip[i].path[j][1])
                 self.path_list[i].insert(j, temp)
+
+    def target_off(self, idx):
+        for i in range(len(self.tbl[0])):
+            cur = self.tbl[idx+5][i]
+            if cur['background'] == "#808080":
+                cur.configure(background="#666666", fg="#a0a0a0")
+            else:
+                cur.configure(background="#808080", fg="#a0a0a0")
+
+    def target_on(self, idx):
+        for i in range(len(self.tbl[0])):
+            cur = self.tbl[idx + 5][i]
+            if cur['background'] == "#666666":
+                cur.configure(background="#808080", fg="#a0a0a0")
+            else:
+                cur.configure(background="white", fg="black")
+
+    def patrol_off(self, idx):
+        for i in range(len(self.tbl)):
+            cur = self.tbl[i][idx + 1]
+            if cur['background'] == "#808080":
+                cur.configure(background="#666666", fg="#a0a0a0")
+            else:
+                cur.configure(background="#808080", fg="#a0a0a0")
+
+    def patrol_on(self, idx):
+        for i in range(len(self.tbl)):
+            cur = self.tbl[i][idx+1]
+            if cur['background'] == "#666666":
+                cur.configure(background="#808080", fg="#a0a0a0")
+            else:
+                cur.configure(background="white", fg="black")
+            # self.frame.grid_columnconfigure(idx, background= "white", fg="black")
+
+
 
 
 
