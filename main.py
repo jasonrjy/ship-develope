@@ -1,5 +1,6 @@
 import copy
 import tkinter as tk
+import tkinter.ttk
 import time
 import case
 from PIL import Image, ImageTk, ImageDraw
@@ -18,9 +19,10 @@ import re
 # resize_image.save("detection.png")
 
 ## -1 == 첫 시작, 0 = stop, 1 = run, 2 = end
-global running, store_time
+global running, store_time, pg_value
 running = -1
 store_time = 0
+pg_value = 0
 
 
 window = tk.Tk()
@@ -31,11 +33,13 @@ window.resizable(0, 0)
 frame_info = tk.Frame(window)
 frame_bbs = tk.Frame(window, padx=10, pady=10)
 frame_btn = tk.Frame(window)
+frame_pgb = tk.Frame(window)
 
 # frame_canvas.pack(side="left", fill="both")
 # frame_info.pack(side="right", fill="both")
 frame_bbs.grid(row=0, column=0)
 frame_info.grid(row=0, column=1)
+frame_pgb.grid(row=1,column=0)
 frame_btn.grid(row=1, column=1)
 
 f_tbl = tk.Frame(frame_info)
@@ -182,11 +186,11 @@ def run_canvas():
             info_t.update_now_detection(res)
             info_t.update_res_detection(tCase)
 
-            print(info_t.tbl[8][1]['disabledbackground'])
+            # print(info_t.tbl[8][1]['disabledbackground'])
             # info_t.tbl[8][1].configure(disabledbackground="#666666")
-            print(info_t.tbl[8][1]['disabledbackground'])
+            # print(info_t.tbl[8][1]['disabledbackground'])
             window.update()
-            print(info_t.tbl[8][1]['background'])
+            # print(info_t.tbl[8][1]['background'])
             time.sleep(0.03)
         else:
             return i
@@ -204,7 +208,18 @@ def run_result():
     running = 1
     tt = 300
     cnt = int(typeChk.countVal.get())
-    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText, info_t.patrol_btn_tg, info_t.target_btn_tg)
+
+    resText.text.config(state=tk.NORMAL)
+    # progress_bar.start(10)
+    progress_bar.pack()
+    progress_bar["value"] = 0
+    progress_bar["maximum"] = cnt
+    print(progress_bar["maximum"])
+
+    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText, info_t.patrol_btn_tg, info_t.target_btn_tg, progress_update)
+    resText.text.config(state=tk.DISABLED)
+    progress_bar.pack_forget()
+
 
 def reset_info():
     global running, store_time
@@ -414,6 +429,10 @@ def update_detection_range_img(event, ent, idx):
     cvs.canvas.coords(cvs.c_patrol_detection[idx], temp_x - (cvs.ratio * cvs.tCase.patrol[idx].detection_dist),
                        temp_y - (cvs.ratio * cvs.tCase.patrol[idx].detection_dist))
 
+def progress_update(value):
+    progress_bar["value"] = value
+    window.update()
+
 
 
 ######## init setting section
@@ -437,6 +456,11 @@ cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
 
 resText = GUI.ResultText(frame_bbs, 75, 25)
+
+
+
+progress_bar = tk.ttk.Progressbar(frame_pgb, maximum=100, length=300, mode="determinate")
+progress_bar.pack()
 
 bbs = [cvs, resText]
 typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)

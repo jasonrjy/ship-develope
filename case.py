@@ -172,7 +172,7 @@ class testCase():
                 n = (-40 - sy) / dy
                 ey = -40
                 ex = sx + n * dx
-            ## dy == 0 and ry == 10
+            ## dy == 0 and ry == 5
             elif ry == 5:
                 ry = 8
                 dy = ry - sy
@@ -184,9 +184,9 @@ class testCase():
                     n = (-40 - sy) / dy
                     ey = -40
                     ex = sx + n * dx
-            ## dy == 0 and ry != 10
+            ## dy == 0 and ry != 5
             else:
-                ry = 10
+                ry = 5
                 dy = ry - sy
                 if dy > 0:
                     n = (40 - sy) / dy
@@ -326,7 +326,7 @@ def cal_case(tt, cnt, p, t):
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
                                                                                 accum_detection_time[i] / cnt, tmp))
 
-def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg):
+def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu):
     max_detection_time = []
     accum_detection_time = []
     find_count = [0, 0, 0]
@@ -337,7 +337,8 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg):
     run_p = copy.deepcopy(p)
     case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
 
-    for i in range(3):
+
+    for i in range(len(p)):
         max_detection_time.append(case_res[i])
         accum_detection_time.append(case_res[i])
         max_target_list.append(case_target)
@@ -347,6 +348,10 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg):
     for i in range(cnt - 1):
         run_p = copy.deepcopy(p)
         case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
+        # pg["value"] = i+1
+        # w.update()
+        pu(i+1)
+        # print("--------------------- pg value = {}".format(pg["value"]))
 
         for j in range(3):
             if (case_res[j] >= max_detection_time[j]):
@@ -392,6 +397,10 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg):
         temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n\n".format(i + 1, find_count[i], cnt,
                                                                                 accum_detection_time[i] / cnt, tmp)
         txt.insert(END, temp)
+
+        # txt.config(state=DISABLED)
+        txt.see("end")
+
 
 def readFile():
     file = open("./data/사전 데이터 입력.txt", 'r', encoding="utf-8")
