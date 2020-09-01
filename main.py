@@ -190,8 +190,6 @@ def run_canvas():
             info_t.update_now_detection(res)
             info_t.update_res_detection(tCase)
 
-            print(tCase.patrol[2].knot)
-
             # print(info_t.tbl[8][1]['disabledbackground'])
             # info_t.tbl[8][1].configure(disabledbackground="#666666")
             # print(info_t.tbl[8][1]['disabledbackground'])
@@ -401,9 +399,19 @@ def edit_path(event, idx):
 
         res = tk.simpledialog.askstring("Patrol Path", "경로를 입력해주십시오.")
         if is_path_format(res):
-            origin.delete(selection[0])
-            origin.insert(selection[0], res)
-            tCase.patrol[idx].update_path(selection[0], res)
+            if selection[0] in [0, origin.size()-1]:
+                origin.delete(0)
+                origin.insert(0, res)
+                origin.delete(origin.size()-1)
+                origin.insert(origin.size(), res)
+
+                tCase.patrol[idx].update_path(0, res)
+                tCase.patrol[idx].update_path(origin.size()-1, res)
+            else:
+                origin.delete(selection[0])
+                origin.insert(selection[0], res)
+                tCase.patrol[idx].update_path(selection[0], res)
+
             showinfo('경로를 수정합니다', res)
             cvs.update_init_draw_patrol()
         else:

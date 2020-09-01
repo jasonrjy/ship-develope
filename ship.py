@@ -92,6 +92,11 @@ class CycleUnit:
     self.path[path_idx][1] = int(input[1])
     self.update_length()
 
+    if path_idx == 0:
+      self.x = self.path[0][0]
+      self.y = self.path[0][1]
+
+
 
   def set_x(self, x):
     self.x = x
