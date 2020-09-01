@@ -88,6 +88,9 @@ class testCase():
 
         return detect
 
+    def set_time(self, time):
+        self.time = time
+
     def set_rand_unit(self, p, tt):
         self.patrol = p
         self.target = self.set_rand_target(tt)
@@ -197,7 +200,7 @@ class testCase():
                     ey = -40
                     ex = sx + n * dx
 
-            target_knot = random.randint(10, 15)
+            target_knot = random.randint(10, 25)
 
             a.set_knot(target_knot)
             a.add_path(sx, sy)
@@ -400,6 +403,7 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu):
 
         # txt.config(state=DISABLED)
         txt.see("end")
+
 
 
 def readFile():

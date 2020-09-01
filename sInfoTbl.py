@@ -227,7 +227,7 @@ class Table:
     def callbackPath(self, P, S):
         if str.isdigit(P) or P == "":
             return True
-        elif S ==" " or S =="," or str.isdigit(S):
+        elif S ==" " or S =="," or S == ":" or str.isdigit(S):
             return True
         else:
             return False

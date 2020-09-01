@@ -1,6 +1,8 @@
 import copy
 import tkinter as tk
 import tkinter.ttk
+import tkinter.simpledialog
+from tkinter.messagebox import askquestion, showinfo
 import time
 import case
 from PIL import Image, ImageTk, ImageDraw
@@ -32,6 +34,7 @@ window.resizable(0, 0)
 
 frame_info = tk.Frame(window)
 frame_bbs = tk.Frame(window, padx=10, pady=10)
+frame_opt = tk.Frame(frame_bbs)
 frame_btn = tk.Frame(window)
 frame_pgb = tk.Frame(window)
 
@@ -41,6 +44,7 @@ frame_bbs.grid(row=0, column=0)
 frame_info.grid(row=0, column=1)
 frame_pgb.grid(row=1,column=0)
 frame_btn.grid(row=1, column=1)
+frame_opt.pack(anchor=tk.E)
 
 f_tbl = tk.Frame(frame_info)
 f_lbl = tk.Frame(frame_info)
@@ -170,8 +174,8 @@ def run_canvas():
     global running, store_time
     running = 1
 
-    for i in range(store_time, int(tCase.total_time)):
-        store_time = i
+    while store_time < int(tCase.total_time):
+        store_time += tCase.time
         if running == 1:
             ## update time with position and return detection res
             res = tCase.update_time(info_t.patrol_btn_tg, info_t.target_btn_tg)
@@ -185,6 +189,8 @@ def run_canvas():
             info_t.update_position(patrol_all_p)
             info_t.update_now_detection(res)
             info_t.update_res_detection(tCase)
+
+            print(tCase.patrol[2].knot)
 
             # print(info_t.tbl[8][1]['disabledbackground'])
             # info_t.tbl[8][1].configure(disabledbackground="#666666")
@@ -345,6 +351,7 @@ def delete_path(event, idx):
     if running == -1:
         origin = info_t.path_list[idx]
 
+        ## selection = list_box에서 선택된 것들의 리스트 // 단일선택만 되니 [0]만 존재
         selection = origin.curselection()
         # sel_val = origin.get(selection)
         # sel_val = re.split(', ', sel_val)
@@ -352,22 +359,65 @@ def delete_path(event, idx):
         # print(selection[0])
         if selection:
             if tCase.patrol[idx].delete_path(selection[0]):
-                origin.delete(selection)
+                print(selection[0])
+                if selection[0] in [0, origin.size()-1]:
+                    origin.delete(origin.size()-1)
+                    origin.delete(0)
+                    origin.insert("end", origin.get(0))
+                else:
+                    origin.delete(selection)
                 cvs.update_init_draw_patrol()
 
 
 def insert_path(event, idx):
+    print("in insert_path")
     global running
     if running == -1:
         origin = info_t.path_entry[idx].get()
+        input_index = info_t.path_list[idx].size() - 1
 
+        print(origin)
+        if origin.find(": "):
+            print("in")
+            temp = re.split(': ', origin)
+            print(temp[0])
+            print(temp[1])
+            input_index = int(temp[0])
+            origin = temp[1]
         input = re.split(', ', origin)
         if len(input) == 2:
             if str.isdigit(input[0]) and str.isdigit(input[1]):
-                tCase.patrol[idx].add_path(int(input[0]), int(input[1]))
-                info_t.path_list[idx].insert(info_t.path_list[idx].size() - 1, origin)
+                tCase.patrol[idx].add_path_index(input_index, int(input[0]), int(input[1]))
+                info_t.path_list[idx].insert(input_index, origin)
                 info_t.path_entry[idx].delete(0, 'end')
         cvs.update_init_draw_patrol()
+
+
+def edit_path(event, idx):
+    global running
+    if running == -1:
+        origin = info_t.path_list[idx]
+        selection = origin.curselection()
+
+        res = tk.simpledialog.askstring("Patrol Path", "경로를 입력해주십시오.")
+        if is_path_format(res):
+            origin.delete(selection[0])
+            origin.insert(selection[0], res)
+            tCase.patrol[idx].update_path(selection[0], res)
+            showinfo('경로를 수정합니다', res)
+            cvs.update_init_draw_patrol()
+        else:
+            show_canceled()
+
+def show_canceled():
+    showinfo('Canceled', 'You canceled')
+
+def is_path_format(path_str):
+    input = re.split(', ', path_str)
+    if len(input) == 2:
+        if str.isdigit(input[0]) and str.isdigit(input[1]):
+            return True
+    return False
 
 
 def set_heading_func():
@@ -433,9 +483,14 @@ def progress_update(value):
     progress_bar["value"] = value
     window.update()
 
+def callback_opt(*args):
+    tCase.set_time(option_var.get())
+    print(option_var.get())
 
 
 ######## init setting section
+
+
 
 tCase = case.testCase()
 tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
@@ -448,19 +503,32 @@ init_total_time = copy.deepcopy(tCase.total_time)
 idata = read_file_formatting(tCase.patrol, tCase.target)
 info_t = sInfoTbl.Table(f_tbl, idata, tCase)
 
-
 tCase.set_fixed_unit(tCase.patrol, tCase.target)
+
+option_list = [1, 0.75, 0.5]
+option_var = tk.DoubleVar(window)
+option_var.trace("w", callback_opt)
+option_var.set(option_list[0])
+
+opt_lbl = tk.Label(frame_opt, text="배속 : ")
+
+opt = tk.OptionMenu(frame_opt, option_var, *option_list)
+opt.config(width=5)
+opt.pack(side="right")
+opt_lbl.pack(side="right")
 
 cvs = GUI.Canvas(frame_bbs, 550, 400, tCase)
 cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
+cvs.set_operation(0, 0, 20, 10)
 
 resText = GUI.ResultText(frame_bbs, 75, 25)
 
-
-
 progress_bar = tk.ttk.Progressbar(frame_pgb, maximum=100, length=300, mode="determinate")
 progress_bar.pack()
+progress_bar.pack_forget()
+
+
 
 bbs = [cvs, resText]
 typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)
@@ -473,6 +541,7 @@ btn_run.grid(row=0, column=1, pady=10, padx=5)
 
 for i in range(len(info_t.path_list)):
     info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
+    info_t.path_list[i].bind('<Double-Button-1>', lambda  event, idx=i: edit_path(event, idx))
 for i in range(len(info_t.path_entry)):
     info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
 for i in range(len(info_t.drange_entry)):

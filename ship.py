@@ -1,4 +1,5 @@
 from math import sqrt, isclose
+import re
 import copy
 
 def interpolate(pos1, pos2, t):
@@ -48,6 +49,20 @@ class CycleUnit:
       self.x = x
       self.y = y
 
+  def add_path_index(self, idx, x, y):
+    if self.num_path == 0:
+      self.path = [[x, y], [x, y]]
+    else:
+      self.path.insert(idx, [x, y])  # 마지막 원소 바로 전에 삽입
+    self.num_path = self.num_path + 1
+
+    # 모든 경로의 길이 계산
+    if self.num_path > 1:
+      self.update_length()
+    else:
+      self.x = x
+      self.y = y
+
   def update_length(self):
     self.length_list = []
     for i in range(self.num_path):
@@ -55,14 +70,27 @@ class CycleUnit:
 
 
   def delete_path(self, path_idx):
-    if len(self.path) > 2:
-      self.path.remove(self.path[path_idx])
-      # for i in range(len(self.path)):
-      #   print("{} {}".format(self.path[i][0], self.path[i][1]))
+    len_path = len(self.path)
+    if len_path > 2:
+      if path_idx in [0, len_path-1]:
+        self.path.remove(self.path[0])
+        self.path.remove(self.path[len_path-2])
+        self.path.append(self.path[0])
+      else:
+        self.path.remove(self.path[path_idx])
       self.num_path -= 1
       self.update_length()
       return True
-    else: return False
+
+    else:
+      return False
+
+
+  def update_path(self, path_idx, val):
+    input = re.split(', ', val)
+    self.path[path_idx][0] = int(input[0])
+    self.path[path_idx][1] = int(input[1])
+    self.update_length()
 
 
   def set_x(self, x):
@@ -207,6 +235,7 @@ class LineUnit:
     else:
       self.x = x
       self.y = y
+
 
   def set_speed(self, speed):
     self.speed = speed

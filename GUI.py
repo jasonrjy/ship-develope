@@ -1,6 +1,8 @@
 import tkinter as tk
 import copy
 from PIL import Image, ImageTk
+import math
+import cv2
 
 class Canvas:
     w = 0
@@ -19,7 +21,7 @@ class Canvas:
     init_patrol = None
     init_count = 1
     init_total_time = 0
-    img = None
+    detection_img = None
 
     def __init__(self, frame, w, h, case):
         self.w = w
@@ -33,8 +35,9 @@ class Canvas:
         self.init_patrol = copy.deepcopy(self.tCase.patrol)
         self.init_count = 1
         self.init_total_time = copy.deepcopy(self.tCase.total_time)
-        self.img = ImageTk.PhotoImage(Image.open('detection.png'))
+        self.detection_img = ImageTk.PhotoImage(Image.open('detection.png'))
         self.images = []
+        self.c_operation_section = []
 
         self.c_patrol_path = []
 
@@ -48,6 +51,20 @@ class Canvas:
         # # self.canvas.create_rectangle(op_x1, op_y1, op_x2, op_y2, fill="#d3d3d3")
         self.canvas.pack()
 
+    def set_operation(self, x1, y1, x2, y2):
+        t_x1, t_y1 = self.converse(x1, y1)
+        t_x2, t_y2 = self.converse(x2, y2)
+
+        line = self.canvas.create_line(t_x1, t_y1, t_x2, t_y1, dash=(4, 4), fill="#f5f5dc")
+        self.c_operation_section.append(line)
+        line = self.canvas.create_line(t_x2, t_y1, t_x2, t_y2, dash=(4, 4), fill="#f5f5dc")
+        self.c_operation_section.append(line)
+        line = self.canvas.create_line(t_x1, t_y2, t_x2, t_y2, dash=(4, 4), fill="#f5f5dc")
+        self.c_operation_section.append(line)
+        line = self.canvas.create_line(t_x1, t_y1, t_x1, t_y2, dash=(4, 4), fill="#f5f5dc")
+        self.c_operation_section.append(line)
+
+
     def converse_x(self, x):
         return self.start_x + (x*10)
 
@@ -57,12 +74,25 @@ class Canvas:
     def converse(self, x, y):
         return self.start_x + (x * 10), self.start_y - (y * 10)
 
+    def get_angle(self, p1, p2):
+        dy = p2[1] - p1[1]
+        dx = p2[0] - p1[0]
+        dx, dy = self.converse(dx, dy)
+        angle = math.atan(dy/dx) * (180/math.pi)
+
+        if dx < 0:
+            angle += 180
+        else:
+            if dy < 0:
+                angle += 360
+
+        return angle
+
     def init_draw_patrol(self, patrol, target):
         for i in range(len(patrol)):
             temp_x, temp_y = patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.images.append(self.img)
-            # print("oooorigin w = {}, h = {}".format(self.images[i].width(), self.images[i].height()))
+            self.images.append(self.detection_img)
 
             ## draw path
             idx = -1
@@ -76,15 +106,20 @@ class Canvas:
                     y1 = self.converse_y(cur_path[j][1])
                     x2 = self.converse_x(cur_path[j + 1][0])
                     y2 = self.converse_y(cur_path[j + 1][1])
-                    line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="#86c5e5")
+                    line = self.canvas.create_line(x1, y1, x2, y2, width=2, dash=(2, 2), fill="#86c5e5")
                     self.c_patrol_path[idx].append(line)
+
             ## draw patrol
-            temp_c = self.canvas.create_oval(temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r,
-                                        fill='green', outline="green")
+            temp_c = self.canvas.create_oval(temp_x - self.ship_r,
+                                             temp_y - self.ship_r,
+                                             temp_x + self.ship_r,
+                                             temp_y + self.ship_r,
+                                            fill='green', outline="green")
             self.c_patrol.append(temp_c)
             ## draw detection range
             temp_c = self.canvas.create_image(temp_x - (self.ratio * patrol[i].detection_dist),
-                                         temp_y - (self.ratio * patrol[i].detection_dist), image=self.images[i], anchor=tk.NW)
+                                         temp_y - (self.ratio * patrol[i].detection_dist),
+                                              image=self.images[i], anchor=tk.NW)
             self.c_patrol_detection.append(temp_c)
 
         for i in range(len(patrol)):
@@ -97,7 +132,10 @@ class Canvas:
             temp_x, temp_y = self.tCase.target[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
             ## draw target
-            temp_c = self.canvas.create_oval(temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r, fill='red')
+            temp_c = self.canvas.create_oval(temp_x - self.ship_r,
+                                             temp_y - self.ship_r,
+                                             temp_x + self.ship_r,
+                                             temp_y + self.ship_r, fill='red')
             self.c_target.append(temp_c)
 
     def update_draw_target(self, target_tg):
@@ -105,14 +143,24 @@ class Canvas:
             if target_tg[i]:
                 temp_x, temp_y = self.tCase.target[i].get_position()
                 temp_x, temp_y = self.converse(temp_x, temp_y)
-                self.canvas.coords(self.c_target[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
+                self.canvas.coords(self.c_target[i],
+                                   temp_x - self.ship_r,
+                                   temp_y - self.ship_r,
+                                   temp_x + self.ship_r,
+                                   temp_y + self.ship_r)
 
     def update_draw_patrol(self, res, patrol_tg, target_tg):
         for i in range(len(self.tCase.patrol)):
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.canvas.coords(self.c_patrol[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r, temp_y + self.ship_r)
-            self.canvas.coords(self.c_patrol_detection[i], temp_x - (self.ratio * self.tCase.patrol[i].detection_dist), temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
+            self.canvas.coords(self.c_patrol[i],
+                               temp_x - self.ship_r,
+                               temp_y - self.ship_r,
+                               temp_x + self.ship_r,
+                               temp_y + self.ship_r)
+            self.canvas.coords(self.c_patrol_detection[i],
+                               temp_x - (self.ratio * self.tCase.patrol[i].detection_dist),
+                               temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
 
         ### draw detection line
         for i in range(len(self.tCase.patrol)):
@@ -127,7 +175,9 @@ class Canvas:
                         x2, y2 = self.converse(x2, y2)
 
                         self.canvas.delete(self.c_patrol_detection_l[i][j])
-                        self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, dash=(4, 2), fill="white")
+                        self.c_patrol_detection_l[i][j] = self.canvas.create_line(x1, y1, x2, y2,
+                                                                                  arrow=tk.LAST, dash=(4, 2),
+                                                                                  fill="white")
                     else:
                         self.canvas.delete(self.c_patrol_detection_l[i][j])
 
@@ -141,9 +191,11 @@ class Canvas:
         for i in range(len(self.tCase.patrol)):
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.canvas.coords(self.c_patrol[i], temp_x - self.ship_r, temp_y - self.ship_r, temp_x + self.ship_r,
-                               temp_y + self.ship_r)
-            self.canvas.coords(self.c_patrol_detection[i], temp_x - (self.ratio * self.tCase.patrol[i].detection_dist),
+            self.canvas.coords(self.c_patrol[i],
+                               temp_x - self.ship_r, temp_y - self.ship_r,
+                               temp_x + self.ship_r, temp_y + self.ship_r)
+            self.canvas.coords(self.c_patrol_detection[i],
+                               temp_x - (self.ratio * self.tCase.patrol[i].detection_dist),
                                temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
 
             cur_path = self.tCase.patrol[i].get_path()
@@ -155,7 +207,7 @@ class Canvas:
                 y1 = self.converse_y(cur_path[j][1])
                 x2 = self.converse_x(cur_path[j + 1][0])
                 y2 = self.converse_y(cur_path[j + 1][1])
-                line = self.canvas.create_line(x1, y1, x2, y2, dash=(2, 2), fill="#86c5e5")
+                line = self.canvas.create_line(x1, y1, x2, y2, width=2, dash=(2, 2), fill="#86c5e5")
                 self.c_patrol_path[i].append(line)
 
 
@@ -169,7 +221,6 @@ class Canvas:
 
 
     def update_detection_range_img(self, event, ent, idx):
-        print("run")
         im_temp = Image.open('detection.png')
         n_pixel = self.ratio * self.tCase.patrol[idx].detection_dist * 2
 
@@ -181,6 +232,14 @@ class Canvas:
         self.images[idx] = ImageTk.PhotoImage(im_temp)
         self.canvas.itemconfigure(self.c_patrol_detection[idx], image=self.images[idx])
 
+# def get_attributes(widget):
+#     widg = widget
+#     keys = widg.keys()
+#     for key in keys:
+#         print("Attribute: {:<20}".format(key), end=' ')
+#         value = widg[key]
+#         vtype = type(value)
+#         print('Type: {:<30} Value: {}'.format(str(vtype), value))
 
 
 class ResultText:
