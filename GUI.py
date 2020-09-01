@@ -35,7 +35,7 @@ class Canvas:
         self.init_patrol = copy.deepcopy(self.tCase.patrol)
         self.init_count = 1
         self.init_total_time = copy.deepcopy(self.tCase.total_time)
-        self.detection_img = ImageTk.PhotoImage(Image.open('Image/detection.png'))
+        self.detection_img = ImageTk.PhotoImage(Image.open('image/detection.png'))
         self.images = []
         self.c_operation_section = []
 
@@ -213,7 +213,7 @@ class Canvas:
 
     def set_detection_range_img(self, patrol):
         for i in range(len(self.c_patrol_detection)):
-            im_temp = Image.open('Image/detection.png')
+            im_temp = Image.open('image/detection.png')
             n_pixel = self.ratio * patrol[i].detection_dist * 2
             im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
             self.images[i] = ImageTk.PhotoImage(im_temp)
@@ -221,7 +221,7 @@ class Canvas:
 
 
     def update_detection_range_img(self, event, ent, idx):
-        im_temp = Image.open('detection.png')
+        im_temp = Image.open('image/detection.png')
         n_pixel = self.ratio * self.tCase.patrol[idx].detection_dist * 2
 
         print(self.tCase.patrol[idx].detection_dist)

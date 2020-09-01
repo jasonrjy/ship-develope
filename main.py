@@ -368,18 +368,12 @@ def delete_path(event, idx):
 
 
 def insert_path(event, idx):
-    print("in insert_path")
     global running
     if running == -1:
         origin = info_t.path_entry[idx].get()
         input_index = info_t.path_list[idx].size() - 1
-
-        print(origin)
-        if origin.find(": "):
-            print("in")
+        if origin.find(": ") != -1:
             temp = re.split(': ', origin)
-            print(temp[0])
-            print(temp[1])
             input_index = int(temp[0])
             origin = temp[1]
         input = re.split(', ', origin)
