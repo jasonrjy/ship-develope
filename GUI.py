@@ -8,7 +8,6 @@ class Canvas:
     w = 0
     h = 0
     ratio = 0
-    ship_r = 0
     start_x = 0
     start_y = 0
     c_patrol = []
@@ -21,13 +20,13 @@ class Canvas:
     init_patrol = None
     init_count = 1
     init_total_time = 0
-    detection_img = None
 
     def __init__(self, frame, w, h, case, op_x, op_y):
         self.w = w
         self.h = h
         self.ratio = 10
-        self.ship_r = 5
+        self.patrol_r = 7
+        self.target_r = 7
         self.operation_x = op_x
         self.operation_y = op_y
         self.start_x = (self.w - op_x * self.ratio) / 2
@@ -37,10 +36,17 @@ class Canvas:
         self.init_patrol = copy.deepcopy(self.tCase.patrol)
         self.init_count = 1
         self.init_total_time = copy.deepcopy(self.tCase.total_time)
-        self.detection_img = ImageTk.PhotoImage(Image.open('image/detection.png'))
-        self.images = []
-        self.c_operation_section = []
 
+
+        # detection_img = ImageTk.PhotoImage(Image.open('image/detection.png'))
+        # self.tk_image_list.append(detection_img)
+        # patrol_img_cv2 = cv2.imread("Image/patrol_img.png", cv2.IMREAD_UNCHANGED)
+        # self.cv_image_list.append(patrol_img_cv2)
+
+        self.patrol_img_tk = []
+        self.target_img_tk = []
+        self.detection_img = []
+        self.c_operation_section = []
         self.c_patrol_path = []
 
         self.canvas = tk.Canvas(frame, width=w, height=h, bg="black", relief="solid")
@@ -66,6 +72,16 @@ class Canvas:
         line = self.canvas.create_line(t_x1, t_y1, t_x1, t_y2, dash=(4, 4), fill="#f5f5dc")
         self.c_operation_section.append(line)
 
+    def rotate_cv2(self, angle):
+        height, width, channel = self.patrol_img_cv2.shape
+        matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        dst = cv2.warpAffine(self.patrol_img_cv2, matrix, (width, height))
+
+        return dst
+
+    def get_angle_position(self, x1, y1, x2, y2):
+        angle = 360 - (math.atan2(y2 - y1, x2 - x1) * (180.0 / math.pi))
+        return angle
 
     def converse_x(self, x):
         return self.start_x + (x*10)
@@ -94,7 +110,8 @@ class Canvas:
         for i in range(len(patrol)):
             temp_x, temp_y = patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.images.append(self.detection_img)
+            d_img = ImageTk.PhotoImage(Image.open('image/detection.png'))
+            self.detection_img.append(d_img)
 
             ## draw path
             idx = -1
@@ -112,16 +129,27 @@ class Canvas:
                     self.c_patrol_path[idx].append(line)
 
             ## draw patrol
-            temp_c = self.canvas.create_oval(temp_x - self.ship_r,
-                                             temp_y - self.ship_r,
-                                             temp_x + self.ship_r,
-                                             temp_y + self.ship_r,
-                                            fill='green', outline="green")
+            t_x1, t_y1 = patrol[i].get_path_index(0)
+            t_x1, t_y1 = self.converse(t_x1, t_y1)
+            t_x2, t_y2 = patrol[i].get_path_index(1)
+            t_x2, t_y2 = self.converse(t_x2, t_y2)
+
+            src = cv2.imread("Image/patrol_img.png", cv2.IMREAD_UNCHANGED)
+            height, width, no_channels = src.shape
+            angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+            matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+            dst = cv2.warpAffine(src, matrix, (width, height))
+            img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+            img = Image.fromarray(img)
+            self.patrol_img_tk.append(ImageTk.PhotoImage(image=img))
+            temp_c = self.canvas.create_image(temp_x - self.patrol_r, temp_y - self.patrol_r,
+                                              image=self.patrol_img_tk[i], anchor=tk.NW)
             self.c_patrol.append(temp_c)
+
             ## draw detection range
             temp_c = self.canvas.create_image(temp_x - (self.ratio * patrol[i].detection_dist),
-                                         temp_y - (self.ratio * patrol[i].detection_dist),
-                                              image=self.images[i], anchor=tk.NW)
+                                              temp_y - (self.ratio * patrol[i].detection_dist),
+                                              image=self.detection_img[i], anchor=tk.NW)
             self.c_patrol_detection.append(temp_c)
 
         for i in range(len(patrol)):
@@ -134,10 +162,25 @@ class Canvas:
             temp_x, temp_y = self.tCase.target[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
             ## draw target
-            temp_c = self.canvas.create_oval(temp_x - self.ship_r,
-                                             temp_y - self.ship_r,
-                                             temp_x + self.ship_r,
-                                             temp_y + self.ship_r, fill='red')
+            # temp_c = self.canvas.create_oval(temp_x - self.target_r,
+            #                                  temp_y - self.target_r,
+            #                                  temp_x + self.target_r,
+            #                                  temp_y + self.target_r, fill='red')
+            t_x1, t_y1 = target[i].get_path_index(0)
+            t_x1, t_y1 = self.converse(t_x1, t_y1)
+            t_x2, t_y2 = target[i].get_path_index(1)
+            t_x2, t_y2 = self.converse(t_x2, t_y2)
+
+            src = cv2.imread("Image/target_img.png", cv2.IMREAD_UNCHANGED)
+            height, width, no_channels = src.shape
+            angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+            matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+            dst = cv2.warpAffine(src, matrix, (width, height))
+            img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+            img = Image.fromarray(img)
+            self.target_img_tk.append(ImageTk.PhotoImage(image=img))
+            temp_c = self.canvas.create_image(temp_x - self.target_r, temp_y - self.target_r,
+                                              image=self.target_img_tk[i], anchor=tk.NW)
             self.c_target.append(temp_c)
 
     def update_draw_target(self, target_tg):
@@ -146,20 +189,19 @@ class Canvas:
                 temp_x, temp_y = self.tCase.target[i].get_position()
                 temp_x, temp_y = self.converse(temp_x, temp_y)
                 self.canvas.coords(self.c_target[i],
-                                   temp_x - self.ship_r,
-                                   temp_y - self.ship_r,
-                                   temp_x + self.ship_r,
-                                   temp_y + self.ship_r)
+                                   temp_x - self.target_r,
+                                   temp_y - self.target_r)
 
     def update_draw_patrol(self, res, patrol_tg, target_tg):
         for i in range(len(self.tCase.patrol)):
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
-            self.canvas.coords(self.c_patrol[i],
-                               temp_x - self.ship_r,
-                               temp_y - self.ship_r,
-                               temp_x + self.ship_r,
-                               temp_y + self.ship_r)
+            # self.canvas.coords(self.c_patrol[i],
+            #                    temp_x - self.ship_r,
+            #                    temp_y - self.ship_r,
+            #                    temp_x + self.ship_r,
+            #                    temp_y + self.ship_r)
+            self.canvas.coords(self.c_patrol[i], temp_x - self.patrol_r, temp_y - self.patrol_r)
             self.canvas.coords(self.c_patrol_detection[i],
                                temp_x - (self.ratio * self.tCase.patrol[i].detection_dist),
                                temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
@@ -194,8 +236,7 @@ class Canvas:
             temp_x, temp_y = self.tCase.patrol[i].get_position()
             temp_x, temp_y = self.converse(temp_x, temp_y)
             self.canvas.coords(self.c_patrol[i],
-                               temp_x - self.ship_r, temp_y - self.ship_r,
-                               temp_x + self.ship_r, temp_y + self.ship_r)
+                               temp_x - self.patrol_r, temp_y - self.patrol_r)
             self.canvas.coords(self.c_patrol_detection[i],
                                temp_x - (self.ratio * self.tCase.patrol[i].detection_dist),
                                temp_y - (self.ratio * self.tCase.patrol[i].detection_dist))
@@ -218,8 +259,8 @@ class Canvas:
             im_temp = Image.open('image/detection.png')
             n_pixel = self.ratio * patrol[i].detection_dist * 2
             im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
-            self.images[i] = ImageTk.PhotoImage(im_temp)
-            self.canvas.itemconfigure(self.c_patrol_detection[i], image=self.images[i])
+            self.detection_img[i] = ImageTk.PhotoImage(im_temp)
+            self.canvas.itemconfigure(self.c_patrol_detection[i], image=self.detection_img[i])
 
 
     def update_detection_range_img(self, event, ent, idx):
@@ -231,8 +272,49 @@ class Canvas:
         print(self.tCase.patrol[idx].detection_dist)
 
         im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
-        self.images[idx] = ImageTk.PhotoImage(im_temp)
-        self.canvas.itemconfigure(self.c_patrol_detection[idx], image=self.images[idx])
+        self.detection_img[idx] = ImageTk.PhotoImage(im_temp)
+        self.canvas.itemconfigure(self.c_patrol_detection[idx], image=self.detection_img[idx])
+
+    def patrol_changed_path(self, changed):
+        for i in range(len(changed)):
+            if changed[i] == 1:
+                self.set_patrol_img(i)
+                # p = self.tCase.patrol[i]
+                # next_path_idx = (p.path_idx + 1) % p.num_path
+                # now_path_idx = p.path_idx % p.num_path
+                # t_x1, t_y1 = p.get_path_index(now_path_idx)
+                # t_x1, t_y1 = self.converse(t_x1, t_y1)
+                # t_x2, t_y2 = p.get_path_index(next_path_idx)
+                # t_x2, t_y2 = self.converse(t_x2, t_y2)
+                #
+                # src = cv2.imread("Image/patrol_img.png", cv2.IMREAD_UNCHANGED)
+                # height, width, no_channels = src.shape
+                # angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+                # matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+                # dst = cv2.warpAffine(src, matrix, (width, height))
+                # img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+                # img = Image.fromarray(img)
+                # self.patrol_img_tk[i] = ImageTk.PhotoImage(image=img)
+                # self.canvas.itemconfigure(self.c_patrol[i], image=self.patrol_img_tk[i])
+
+    def set_patrol_img(self, patrol_i):
+        p = self.tCase.patrol[patrol_i]
+        next_path_idx = (p.path_idx + 1) % p.num_path
+        now_path_idx = p.path_idx % p.num_path
+        t_x1, t_y1 = p.get_path_index(now_path_idx)
+        t_x1, t_y1 = self.converse(t_x1, t_y1)
+        t_x2, t_y2 = p.get_path_index(next_path_idx)
+        t_x2, t_y2 = self.converse(t_x2, t_y2)
+
+        src = cv2.imread("Image/patrol_img.png", cv2.IMREAD_UNCHANGED)
+        height, width, no_channels = src.shape
+        angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+        matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        dst = cv2.warpAffine(src, matrix, (width, height))
+        img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+        img = Image.fromarray(img)
+        self.patrol_img_tk[patrol_i] = ImageTk.PhotoImage(image=img)
+        self.canvas.itemconfigure(self.c_patrol[patrol_i], image=self.patrol_img_tk[patrol_i])
 
 # def get_attributes(widget):
 #     widg = widget

@@ -10,6 +10,8 @@ import sInfoTbl
 import GUI
 import type
 import re
+import cv2
+import math
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -181,7 +183,10 @@ def run_canvas():
         store_time += tCase.time
         if running == 1:
             ## update time with position and return detection res
-            res = tCase.update_time(info_t.patrol_btn_tg, info_t.target_btn_tg)
+            res, path_changed = tCase.update_time(info_t.patrol_btn_tg, info_t.target_btn_tg)
+            print(path_changed)
+            cvs.patrol_changed_path(path_changed)
+
             # get now patrol position to list
             patrol_all_p = tCase.get_all_position()
             # re-draw target
@@ -274,15 +279,16 @@ def reset_info():
         temp_x, temp_y = cvs.converse(temp_x, temp_y)
         # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
 
-        cvs.canvas.coords(cvs.c_patrol[i], temp_x - cvs.ship_r, temp_y - cvs.ship_r, temp_x + cvs.ship_r, temp_y + cvs.ship_r)
+        cvs.canvas.coords(cvs.c_patrol[i], temp_x - cvs.patrol_r, temp_y - cvs.patrol_r)
         # print("c_patorl {} = {}".format(i, canvas.coords(c_patrol[i])))
         ## init size c_patrol_detection
         cvs.set_detection_range_img(tCase.patrol)
         cvs.canvas.coords(cvs.c_patrol_detection[i], temp_x - (cvs.ratio * 5), temp_y - (cvs.ratio * 5))
+        cvs.set_patrol_img(i)
     for i in range(len(cvs.c_target)):
         temp_x, temp_y = tCase.target[i].get_position()
         temp_x, temp_y = cvs.converse(temp_x, temp_y)
-        cvs.canvas.coords(cvs.c_target[i], temp_x - cvs.ship_r, temp_y - cvs.ship_r, temp_x + cvs.ship_r, temp_y + cvs.ship_r)
+        cvs.canvas.coords(cvs.c_target[i], temp_x - cvs.target_r, temp_y - cvs.target_r)
     for i in range(len(cvs.c_patrol_detection_l)):
         for j in range(len(cvs.c_patrol_detection_l[i])):
             cvs.canvas.delete(cvs.c_patrol_detection_l[i][j])
@@ -463,10 +469,12 @@ def property_target_toggle(idx):
         info_t.target_btn[idx]['background'] = "#808080"
         info_t.target_btn[idx]['fg'] = "#a0a0a0"
         info_t.target_off(idx)
+        cvs.canvas.itemconfigure(cvs.c_target[idx], state=tk.HIDDEN)
     else:
         info_t.target_btn[idx]['background'] = "white"
         info_t.target_btn[idx]['fg'] = "blue"
         info_t.target_on(idx)
+        cvs.canvas.itemconfigure(cvs.c_target[idx], state=tk.NORMAL)
 
     info_t.target_btn_tg[idx] = not info_t.target_btn_tg[idx]
 
@@ -477,8 +485,8 @@ def update_detection_range_img(event, ent, idx):
     n_pixel = cvs.ratio * tCase.patrol[idx].detection_dist * 2
 
     im_temp = im_temp.resize((n_pixel, n_pixel), Image.ANTIALIAS)
-    cvs.images[idx] = ImageTk.PhotoImage(im_temp)
-    cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], image=cvs.images[idx])
+    cvs.detection_img[idx] = ImageTk.PhotoImage(im_temp)
+    cvs.canvas.itemconfigure(cvs.c_patrol_detection[idx], image=cvs.detection_img[idx])
 
     temp_x, temp_y = tCase.patrol[idx].get_position()
     temp_x, temp_y = cvs.converse(temp_x, temp_y)
@@ -492,6 +500,32 @@ def progress_update(value):
 def callback_opt(*args):
     tCase.set_time(option_var.get())
     print(option_var.get())
+
+def draw_init_patrol_cv():
+    imgtk_list = []
+    for i in range(len(tCase.patrol)):
+        src = cv2.imread("Image/patrol_img.png", cv2.IMREAD_UNCHANGED)
+
+        t_x1, t_y1 = tCase.patrol[i].get_path_index(0)
+        t_x1, t_y1 = cvs.converse(t_x1, t_y1)
+        t_x2, t_y2 = tCase.patrol[i].get_path_index(1)
+        t_x2, t_y2 = cvs.converse(t_x2, t_y2)
+        height, width, no_channels = src.shape
+        angle = 360 - (math.atan2(t_x2 - t_x1, t_y2 - t_y2) * (180.0 / math.pi))
+        matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        dst = cv2.warpAffine(src, matrix, (width, height))
+
+        img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+        img = Image.fromarray(img)
+        imgtk = ImageTk.PhotoImage(image=img)
+        imgtk_list.append(imgtk)
+        # img_pil = ImageTk.PhotoImage(Image.open('image/patrol_img.png'))
+
+    for i in range(len(tCase.patrol)):
+        temp_x, temp_y = tCase.patrol[i].get_position()
+        temp_x, temp_y = cvs.converse(temp_x, temp_y)
+        temp_c = cvs.canvas.create_image(temp_x - 7.5, temp_y - 7.5, image=imgtk_list[i], anchor=tk.NW)
+        cvs.c_patrol.append(temp_c)
 
 
 ######## init setting section

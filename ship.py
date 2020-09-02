@@ -26,6 +26,8 @@ class CycleUnit:
     self.time = 0
     self.detection_dist = 0
     self.detection_on = 0
+    self.path_idx = 0
+    self.ship_img_func = None
     
  
   def test_print(self, x):
@@ -113,29 +115,30 @@ class CycleUnit:
 
   def set_detection(self, dist):
     self.detection_dist = dist
+
+  def set_ship_img_func(self, func):
+    self.ship_img_func = func
       
   def get_position(self):
     return [self.x, self.y]
 
-
   def get_x(self):
     return self.x
-
 
   def get_y(self):
     return self.y
 
-
   def get_knot(self):
     return self.knot
-
 
   def get_detection_dist(self):
     return self.detection_dist
 
-
   def get_path(self):
     return self.path
+
+  def get_path_index(self, idx):
+    return self.path[idx][0], self.path[idx][1]
 
   def print_position(self):
     print("x = {}, y = {}".format(self.x, self.y))
@@ -151,10 +154,15 @@ class CycleUnit:
     ship 객체를 time 만큼 전진시킴.
     """
     self.time = self.time + time
-    self.x, self.y = self.current_pos()
+    [self.x, self.y], path_idx = self.current_pos()
+    path_changed = 0
+    if path_idx != self.path_idx:
+      self.path_idx = path_idx
+      path_changed = 1
+
     # print("Position at time {} is".format(self.time), end=' ')
     # print(" {0} {1}".format(self.x, self.y), end='\n')
-    return self.x, self.y
+    return self.x, self.y, path_changed
 
   def current_pos(self):
     """
@@ -190,7 +198,7 @@ class CycleUnit:
     #보간 연산을 통해 현재 ship의 위치를 계산함.
     current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
     
-    return current_pos
+    return current_pos, idx
   
   def detection(self, target):
     dist = distance(self.get_position(), target.get_position())
@@ -258,6 +266,9 @@ class LineUnit:
   def get_position2(self):
     return self.x, self.y
 
+  def get_path_index(self, idx):
+    return self.path[idx][0], self.path[idx][1]
+
   def length_to_time(self, length):
     """
     주어진 길이를 속도로 나눠 걸리는 시간을 반환
@@ -277,7 +288,7 @@ class LineUnit:
       self.x = self.path[0][0]
       self.y = self.path[0][1]
       self.time = self.time + time
-      self.x, self.y = self.current_pos()
+      [self.x, self.y] = self.current_pos()
       # print("Position at time {} is".format(self.time), end=' ')
       # print(" {0} {1}".format(self.x, self.y), end='\n')
       # print(self.time_to_pos())
@@ -297,13 +308,13 @@ class LineUnit:
 
     if total_time >= cur_time:
       while cur_time > self.length_to_time(self.length_list[idx]):
-        cur_time -=self.length_to_time(self.length_list[idx])
+        cur_time -= self.length_to_time(self.length_list[idx])
         idx = (idx + 1) % self.num_path
       unit_time = float(cur_time) / self.length_to_time(self.length_list[idx])
       current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
     else:
-      return [self.x, self.y]
-      # return [-999, -999]
+      # return [self.x, self.y]
+      return [-999, -999]
 
     return current_pos
 

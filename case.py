@@ -33,10 +33,12 @@ class testCase():
         ## coordinate change after self.time
 
         detect = [[0 for col in range(len(self.patrol))] for row in range(len(self.target))]
-
+        patrol_path_changed = []
         for i in range(len(self.patrol)):
+            changed = 0
             if patrol_tg[i]:
-                self.patrol[i].advance(self.time)
+                x, y, changed = self.patrol[i].advance(self.time)
+            patrol_path_changed.append(changed)
         #   print("Patrol {} Position at time {} is".format(i, self.patrol[i].time), end=' ')
         #   print(" {0} {1}".format(self.patrol[i].x, self.patrol[i].y), end='\n')
         # print("\n")
@@ -71,7 +73,8 @@ class testCase():
             if not patrol_tg[i]: continue
             find = 0
             for j in range(len(self.target)):
-                if not target_tg[j]: continue
+                if not target_tg[j]:
+                    continue
                 dist = ship.distance(self.patrol[i].get_position(), self.target[j].get_position())
                 if dist <= self.patrol[i].detection_dist:
                     detect[i][j] = dist
@@ -89,7 +92,7 @@ class testCase():
                 self.total_accum_t[i] += self.time
                 # print("find num = {}\n".format(find))
 
-        return detect
+        return detect, patrol_path_changed
 
     def set_time(self, time):
         self.time = time
