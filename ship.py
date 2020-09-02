@@ -302,7 +302,8 @@ class LineUnit:
       unit_time = float(cur_time) / self.length_to_time(self.length_list[idx])
       current_pos = interpolate(self.path[idx], self.path[(idx + 1) % self.num_path], unit_time)
     else:
-      return [self.x, self.y] 
+      return [self.x, self.y]
+      # return [-999, -999]
 
     return current_pos
 

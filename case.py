@@ -8,7 +8,7 @@ from tkinter import *
 
 
 class testCase():
-    def __init__(self):
+    def __init__(self, op_x, op_y):
         self.patrol = []
         self.target = []
         self.time = 1
@@ -18,6 +18,9 @@ class testCase():
         self.total_time = 0
         self.accum_time = []
         self.ftime = []
+        self.operation_x = op_x
+        self.operation_y = op_y
+        self.oper_margin = 0
 
     def get_all_position(self):
         data = []
@@ -91,6 +94,9 @@ class testCase():
     def set_time(self, time):
         self.time = time
 
+    def set_operation_margin(self, num):
+        self.oper_margin = num
+
     def set_rand_unit(self, p, tt):
         self.patrol = p
         self.target = self.set_rand_target(tt)
@@ -142,65 +148,75 @@ class testCase():
     def set_rand_target(self, tt):
         ### setting random target point
         target = []
+        r_sx = -int(self.oper_margin)
+        r_ex = int(self.operation_x + self.oper_margin)
+        r_sy = -int(self.oper_margin)
+        r_ey = int(self.operation_y + self.oper_margin)
+        r_x = 2*self.oper_margin + self.operation_x
+        r_y = 2*self.oper_margin + self.operation_y
+
         for i in range(3):
             a = ship.LineUnit()
 
             ran = random.randint(0, 4)
-            if ran == 0:
-                sx = random.randint(-20, 0)
-                sy = random.randint(10, 20)
-            elif ran == 1:
-                sx = random.randint(0, 20)
-                sy = random.randint(10, 20)
-            elif ran == 2:
-                sx = random.randint(20, 40)
-                sy = random.randint(10, 20)
-            elif ran == 3:
-                sx = random.randint(-20, 0)
-                sy = random.randint(0, 10)
-            elif ran == 4:
-                sx = random.randint(20, 40)
-                sy = random.randint(0, 10)
 
-            rx = random.randint(0, 20)
-            ry = random.randint(0, 10)
+            if ran == 0:
+                sx = random.randint(r_sx - r_x, r_sx)
+                sy = random.randint(r_ey, r_ey + r_y)
+            elif ran == 1:
+                sx = random.randint(r_sx, r_ex)
+                sy = random.randint(r_ey, r_ey + r_y)
+            elif ran == 2:
+                sx = random.randint(r_ex, r_ex + r_x)
+                sy = random.randint(r_ey, r_ey + r_y)
+            elif ran == 3:
+                sx = random.randint(r_sx - r_x, r_sx)
+                sy = random.randint(r_sy, r_sy + r_y)
+            elif ran == 4:
+                sx = random.randint(r_ex, r_ex + r_x)
+                sy = random.randint(r_sy, r_sy + r_y)
+
+            rx = random.randint(0, self.operation_x)
+            ry = random.randint(0, self.operation_y)
 
             dy = ry - sy
             dx = rx - sx
+
             if dy > 0:
-                n = (40 - sy) / dy
-                ey = 40
+                n = (4 * self.operation_y - sy) / dy
+                ey = 4 * self.operation_y
                 ex = sx + n * dx
             elif dy < 0:
-                n = (-40 - sy) / dy
-                ey = -40
+                n = (-4 * self.operation_y - sy) / dy
+                ey = -4 * self.operation_y
                 ex = sx + n * dx
-            ## dy == 0 and ry == 5
-            elif ry == 5:
-                ry = 8
+            ## dy == 0 and ry == half
+            elif ry == self.operation_y/2:
+                ry += 3
                 dy = ry - sy
                 if dy > 0:
-                    n = (40 - sy) / dy
-                    ey = 40
+                    n = (4 * self.operation_y - sy) / dy
+                    ey = 4 * self.operation_y
                     ex = sx + n * dx
                 elif dy < 0:
-                    n = (-40 - sy) / dy
-                    ey = -40
+                    n = (-4 * self.operation_y - sy) / dy
+                    ey = -4 * self.operation_y
                     ex = sx + n * dx
-            ## dy == 0 and ry != 5
+            ## dy == 0 and ry != half
             else:
-                ry = 5
+                ry = self.operation_y/2
                 dy = ry - sy
                 if dy > 0:
-                    n = (40 - sy) / dy
-                    ey = 40
+                    n = (4 * self.operation_y - sy) / dy
+                    ey = 4 * self.operation_y
                     ex = sx + n * dx
                 elif dy < 0:
-                    n = (-40 - sy) / dy
-                    ey = -40
+                    n = (-4 * self.operation_y - sy) / dy
+                    ey = -4 * self.operation_y
                     ex = sx + n * dx
 
             target_knot = random.randint(10, 25)
+            print("t_knot : {}".format(target_knot))
 
             a.set_knot(target_knot)
             a.add_path(sx, sy)
@@ -215,8 +231,9 @@ class testCase():
         return self.target
 
 
-def run_rand_case(tt, p, p_tg, t_tg):
-    case = testCase()
+def run_rand_case(tt, p, p_tg, t_tg, op_x, op_y):
+    case = testCase(op_x, op_y)
+    case.set_operation_margin(5)
     case.set_rand_unit(p, tt)
     case.set_total_time(tt)
 
@@ -229,7 +246,8 @@ def run_rand_case(tt, p, p_tg, t_tg):
         case.accum_t += case.time
 
     for i in range(len(case.patrol)):
-        if not p_tg[i]: continue
+        if not p_tg[i]:
+            continue
         print("Patrol {}'s detection".format(i))
         print(" total detection time = {}".format(case.total_accum_t[i]))
         for j in range(len(case.target)):
@@ -246,6 +264,7 @@ def run_rand_case(tt, p, p_tg, t_tg):
 
 def run_fixed_case(tt, p, t):
     case = testCase()
+    case.set_operation_margin(5)
     case.set_fixed_unit(p, t)
     case.set_total_time(tt)
 
@@ -329,16 +348,17 @@ def cal_case(tt, cnt, p, t):
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
                                                                                 accum_detection_time[i] / cnt, tmp))
 
-def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu):
+def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
     max_detection_time = []
     accum_detection_time = []
     find_count = [0, 0, 0]
     max_target_list = []
     txt = Res.text
+    print(op_x, op_y)
 
     # ### run rand case
     run_p = copy.deepcopy(p)
-    case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
+    case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op_x, op_y)
 
 
     for i in range(len(p)):
@@ -350,7 +370,7 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu):
 
     for i in range(cnt - 1):
         run_p = copy.deepcopy(p)
-        case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg)
+        case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op_x, op_y)
         # pg["value"] = i+1
         # w.update()
         pu(i+1)

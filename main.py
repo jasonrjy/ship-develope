@@ -26,6 +26,9 @@ running = -1
 store_time = 0
 pg_value = 0
 
+operation_x = 20
+operation_y = 10
+oper_margin = 5
 
 window = tk.Tk()
 window.title("Ship Detection Program")
@@ -220,7 +223,8 @@ def run_result():
     progress_bar["maximum"] = cnt
     print(progress_bar["maximum"])
 
-    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText, info_t.patrol_btn_tg, info_t.target_btn_tg, progress_update)
+    case.cal_case_write_text(tt, cnt, tCase.patrol, tCase.target, resText, info_t.patrol_btn_tg,
+                             info_t.target_btn_tg, progress_update, operation_x, operation_y)
     resText.text.config(state=tk.DISABLED)
     progress_bar.pack_forget()
 
@@ -494,7 +498,8 @@ def callback_opt(*args):
 
 
 
-tCase = case.testCase()
+tCase = case.testCase(operation_x, operation_y)
+tCase.set_operation_margin(oper_margin)
 tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
 ## init store
 init_target = copy.deepcopy(tCase.target)
@@ -519,7 +524,7 @@ opt.config(width=5)
 opt.pack(side="right")
 opt_lbl.pack(side="right")
 
-cvs = GUI.Canvas(frame_bbs, 550, 400, tCase)
+cvs = GUI.Canvas(frame_bbs, 550, 400, tCase, operation_x, operation_y)
 cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
 cvs.set_operation(0, 0, 20, 10)

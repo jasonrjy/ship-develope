@@ -23,13 +23,15 @@ class Canvas:
     init_total_time = 0
     detection_img = None
 
-    def __init__(self, frame, w, h, case):
+    def __init__(self, frame, w, h, case, op_x, op_y):
         self.w = w
         self.h = h
         self.ratio = 10
         self.ship_r = 5
-        self.start_x = (self.w - 20 * self.ratio) / 2
-        self.start_y = self.h / 2 + (10 * self.ratio) / 2
+        self.operation_x = op_x
+        self.operation_y = op_y
+        self.start_x = (self.w - op_x * self.ratio) / 2
+        self.start_y = self.h / 2 + (op_y * self.ratio) / 2
         self.tCase = case
         self.init_target = copy.deepcopy(self.tCase.target)
         self.init_patrol = copy.deepcopy(self.tCase.patrol)
