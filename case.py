@@ -67,7 +67,7 @@ class testCase():
         #             detect[i][j] = -1
         #     if find > 0:
         #         self.total_accum_t[i] += self.time
-        #         # print("find num = {}\n".format(find))
+        #         # print("find num = {}\n".format(find))   
 
         for i in range(len(self.patrol)):
             if not patrol_tg[i]: continue
@@ -219,7 +219,6 @@ class testCase():
                     ex = sx + n * dx
 
             target_knot = random.randint(10, 25)
-            print("t_knot : {}".format(target_knot))
 
             a.set_knot(target_knot)
             a.add_path(sx, sy)

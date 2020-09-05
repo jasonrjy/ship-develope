@@ -170,10 +170,12 @@ class Canvas:
             t_x1, t_y1 = self.converse(t_x1, t_y1)
             t_x2, t_y2 = target[i].get_path_index(1)
             t_x2, t_y2 = self.converse(t_x2, t_y2)
+            print(t_x1, t_y1, t_x2, t_y2)
 
             src = cv2.imread("Image/target_img.png", cv2.IMREAD_UNCHANGED)
             height, width, no_channels = src.shape
             angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+            print(angle)
             matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
             dst = cv2.warpAffine(src, matrix, (width, height))
             img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
@@ -275,6 +277,7 @@ class Canvas:
         self.detection_img[idx] = ImageTk.PhotoImage(im_temp)
         self.canvas.itemconfigure(self.c_patrol_detection[idx], image=self.detection_img[idx])
 
+
     def patrol_changed_path(self, changed):
         for i in range(len(changed)):
             if changed[i] == 1:
@@ -315,6 +318,25 @@ class Canvas:
         img = Image.fromarray(img)
         self.patrol_img_tk[patrol_i] = ImageTk.PhotoImage(image=img)
         self.canvas.itemconfigure(self.c_patrol[patrol_i], image=self.patrol_img_tk[patrol_i])
+
+    def set_target_img(self, target_i):
+        t = self.tCase.target[target_i]
+        next_path_idx = 1
+        now_path_idx = 0
+        t_x1, t_y1 = t.get_path_index(now_path_idx)
+        t_x1, t_y1 = self.converse(t_x1, t_y1)
+        t_x2, t_y2 = t.get_path_index(next_path_idx)
+        t_x2, t_y2 = self.converse(t_x2, t_y2)
+
+        src = cv2.imread("Image/target_img.png", cv2.IMREAD_UNCHANGED)
+        height, width, no_channels = src.shape
+        angle = (math.atan2(t_x2 - t_x1, t_y2 - t_y1) * (180.0 / math.pi)) - 180
+        matrix = cv2.getRotationMatrix2D((width / 2, height / 2), angle, 1)
+        dst = cv2.warpAffine(src, matrix, (width, height))
+        img = cv2.cvtColor(dst, cv2.COLOR_BGR2RGBA)
+        img = Image.fromarray(img)
+        self.target_img_tk[target_i] = ImageTk.PhotoImage(image=img)
+        self.canvas.itemconfigure(self.c_target[target_i], image=self.target_img_tk[target_i])
 
 # def get_attributes(widget):
 #     widg = widget

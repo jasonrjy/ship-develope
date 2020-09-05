@@ -184,13 +184,14 @@ def run_canvas():
         if running == 1:
             ## update time with position and return detection res
             res, path_changed = tCase.update_time(info_t.patrol_btn_tg, info_t.target_btn_tg)
-            print(path_changed)
             cvs.patrol_changed_path(path_changed)
 
             # get now patrol position to list
             patrol_all_p = tCase.get_all_position()
             # re-draw target
             cvs.update_draw_target(info_t.target_btn_tg)
+            for i in range(len(tCase.target)):
+                cvs.set_target_img(i)
             # re-draw patrol with detection range and detection line
             cvs.update_draw_patrol(res, info_t.patrol_btn_tg, info_t.target_btn_tg)
             # update x,y
