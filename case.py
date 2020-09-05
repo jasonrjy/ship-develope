@@ -1,10 +1,9 @@
 import ship
-import sys
-import os
 import copy
 import re
 import random
-from tkinter import *
+import tkinter as tk
+import tkinter.font as tkFont
 
 
 class testCase():
@@ -157,6 +156,11 @@ class testCase():
         r_ey = int(self.operation_y + self.oper_margin)
         r_x = 2*self.oper_margin + self.operation_x
         r_y = 2*self.oper_margin + self.operation_y
+
+        sx= 0
+        sy= 0
+        ex= 0
+        ey = 0
 
         for i in range(3):
             a = ship.LineUnit()
@@ -390,9 +394,9 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
     print("\n--------------------------\n\n총 탐색 시간 : {} 분".format(int(tt)))
     print("탐색 속력 : {} Knot\n\n--------------------------\n".format(p[0].knot))
     temp = "\n--------------------------\n\n총 탐색 시간 : {} 분\n".format(int(tt))
-    txt.insert(END, temp)
+    txt.insert(tk.END, temp)
     temp = "탐색 속력 : {} Knot\n".format(p[0].knot)
-    txt.insert(END, temp)
+    txt.insert(tk.END, temp)
 
     #  run fixed case with print
     run_p = copy.deepcopy(p)
@@ -405,7 +409,7 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
     #### print part
     print("--------------------------\n\n{} 번의 임의 실행 결과\n".format(cnt))
     temp = "\n--------------------------\n\n{} 번의 임의 실행 결과\n\n".format(cnt)
-    txt.insert(END, temp)
+    txt.insert(tk.END, temp)
     # for i in range(3):
     #   print("{}번이 최대 접촉할 때의 target 좌표".format(i+1))
     #   for j in range(3):
@@ -416,12 +420,15 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
         tmp = int((100 * accum_detection_time[i] / cnt) / int(tt))
         print("{}번 경로\n 최대 접촉 시간 : {}".format(i + 1, max_detection_time[i]))
         temp = "{}번 경로\n 최대 접촉 시간 : {}\n".format(i + 1, max_detection_time[i])
-        txt.insert(END, temp)
+        txt.insert(tk.END, temp)
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, find_count[i], cnt,
                                                                                 accum_detection_time[i] / cnt, tmp))
-        temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n\n".format(i + 1, find_count[i], cnt,
-                                                                                accum_detection_time[i] / cnt, tmp)
-        txt.insert(END, temp)
+        temp = " {} 번 탐지 횟수 : {} / {} 회  →  탐지율 : ".format(i + 1, find_count[i], cnt)
+        txt.insert(tk.END, temp)
+        txt.configure(fg="#a0a0a0")
+        temp = "{} %\n\n".format(tmp)
+        txt.insert(tk.END, temp)
+        txt.configure(fg="black")
 
         # txt.config(state=DISABLED)
         txt.see("end")

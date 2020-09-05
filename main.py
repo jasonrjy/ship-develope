@@ -222,7 +222,8 @@ def run_result():
     tt = 300
     cnt = int(typeChk.countVal.get())
 
-    resText.text.config(state=tk.NORMAL)
+    font = tk.font.Font(weight="bold", size=10)
+    resText.text.config(state=tk.NORMAL, font=font)
     # progress_bar.start(10)
     progress_bar.pack()
     progress_bar["value"] = 0
@@ -564,7 +565,7 @@ cvs.init_draw_patrol(tCase.patrol, tCase.target)
 cvs.init_draw_target(tCase.target)
 cvs.set_operation(0, 0, 20, 10)
 
-resText = GUI.ResultText(frame_bbs, 75, 25)
+resText = GUI.ResultText(frame_bbs, 75, 23)
 
 progress_bar = tk.ttk.Progressbar(frame_pgb, maximum=100, length=300, mode="determinate")
 progress_bar.pack()
