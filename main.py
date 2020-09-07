@@ -12,6 +12,7 @@ import type
 import re
 import cv2
 import math
+import graphic
 
 # img = Image.new('RGB', (200, 200), (255, 255, 255))  ## Image에 대한 속성, 픽셀, 색깔 정해주기
 # drw = ImageDraw.Draw(img, 'RGBA')
@@ -34,30 +35,43 @@ oper_margin = 5
 
 window = tk.Tk()
 window.title("Ship Detection Program")
-window.geometry("900x500")
+window.geometry("950x550")
 window.resizable(0, 0)
 
-frame_info = tk.Frame(window)
-frame_bbs = tk.Frame(window, padx=10, pady=10)
-frame_opt = tk.Frame(frame_bbs)
-frame_btn = tk.Frame(window)
-frame_pgb = tk.Frame(window)
+notebook = tk.ttk.Notebook(window)
+notebook.pack()
 
-# frame_canvas.pack(side="left", fill="both")
-# frame_info.pack(side="right", fill="both")
-frame_bbs.grid(row=0, column=0)
-frame_info.grid(row=0, column=1)
-frame_pgb.grid(row=1,column=0)
-frame_btn.grid(row=1, column=1)
-frame_opt.pack(anchor=tk.E)
+wu = window.update
 
-f_tbl = tk.Frame(frame_info)
-f_lbl = tk.Frame(frame_info)
-f_chk = tk.Frame(frame_info)
+frame_graphic = tk.Frame(window, bg="white")
+graphic.Graphic(frame_graphic, wu)
+notebook.add(frame_graphic, text="그래픽")
 
-f_lbl.grid(row=0)
-f_chk.grid(row=1)
-f_tbl.grid(row=2)
+frame_res_text = tk.Frame(window, bg="white")
+# resultText.resText(frame_res_text)
+notebook.add(frame_res_text, text="실행 결과")
+
+# frame_info = tk.Frame(window)
+# frame_bbs = tk.Frame(window, padx=10, pady=10)
+# frame_opt = tk.Frame(frame_bbs)
+# frame_btn = tk.Frame(window)
+# frame_pgb = tk.Frame(window)
+#
+# # frame_canvas.pack(side="left", fill="both")
+# # frame_info.pack(side="right", fill="both")
+# frame_bbs.grid(row=0, column=0)
+# frame_info.grid(row=0, column=1)
+# frame_pgb.grid(row=1,column=0)
+# frame_btn.grid(row=1, column=1)
+# frame_opt.pack(anchor=tk.E)
+#
+# f_tbl = tk.Frame(frame_info)
+# f_lbl = tk.Frame(frame_info)
+# f_chk = tk.Frame(frame_info)
+#
+# f_lbl.grid(row=0)
+# f_chk.grid(row=1)
+# f_tbl.grid(row=2)
 
 
 # def RdiotoFixed():
@@ -107,12 +121,9 @@ f_tbl.grid(row=2)
 # rdioR = None
 
 
-# Label
-head_lbl = tk.Label(f_lbl, text="Ship Info.")
-head_lbl.grid(row=0)
-
-
-images = []
+# # Label
+# head_lbl = tk.Label(f_lbl, text="Ship Info.")
+# head_lbl.grid(row=0)
 
 
 def path_to_string(s):
@@ -534,68 +545,68 @@ def draw_init_patrol_cv():
 
 
 
-tCase = case.testCase(operation_x, operation_y)
-tCase.set_operation_margin(oper_margin)
-tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
-## init store
-init_target = copy.deepcopy(tCase.target)
-init_patrol = copy.deepcopy(tCase.patrol)
-init_count = copy.deepcopy(count)
-init_total_time = copy.deepcopy(tCase.total_time)
-
-idata = read_file_formatting(tCase.patrol, tCase.target)
-info_t = sInfoTbl.Table(f_tbl, idata, tCase)
-
-tCase.set_fixed_unit(tCase.patrol, tCase.target)
-
-option_list = [1, 0.75, 0.5]
-option_var = tk.DoubleVar(window)
-option_var.trace("w", callback_opt)
-option_var.set(option_list[0])
-
-opt_lbl = tk.Label(frame_opt, text="배속 : ")
-
-opt = tk.OptionMenu(frame_opt, option_var, *option_list)
-opt.config(width=5)
-opt.pack(side="right")
-opt_lbl.pack(side="right")
-
-cvs = GUI.Canvas(frame_bbs, 550, 400, tCase, operation_x, operation_y)
-cvs.init_draw_patrol(tCase.patrol, tCase.target)
-cvs.init_draw_target(tCase.target)
-cvs.set_operation(0, 0, 20, 10)
-
-resText = GUI.ResultText(frame_bbs, 75, 23)
-
-progress_bar = tk.ttk.Progressbar(frame_pgb, maximum=100, length=300, mode="determinate")
-progress_bar.pack()
-progress_bar.pack_forget()
-
-
-
-bbs = [cvs, resText]
-typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)
-
-
-btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)
-btn_reset.grid(row=0, column=0, pady=10, padx=5)
-btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=toggleBtn)
-btn_run.grid(row=0, column=1, pady=10, padx=5)
-
-for i in range(len(info_t.path_list)):
-    info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
-    info_t.path_list[i].bind('<Double-Button-1>', lambda  event, idx=i: edit_path(event, idx))
-for i in range(len(info_t.path_entry)):
-    info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
-for i in range(len(info_t.drange_entry)):
-    info_t.drange_entry[i].bind("<Return>", lambda event, ent=info_t.drange_entry[i], idx=i: update_detection_range_img(event, ent, idx))
-
-# print(cvs.set_detection_range_img(tCase.patrol))
-set_heading_func()
-set_property_func()
-
-
-window.update()
+# tCase = case.testCase(operation_x, operation_y)
+# tCase.set_operation_margin(oper_margin)
+# tCase.total_time, count, tCase.patrol, tCase.target = case.readFile()
+# ## init store
+# init_target = copy.deepcopy(tCase.target)
+# init_patrol = copy.deepcopy(tCase.patrol)
+# init_count = copy.deepcopy(count)
+# init_total_time = copy.deepcopy(tCase.total_time)
+#
+# idata = read_file_formatting(tCase.patrol, tCase.target)
+# info_t = sInfoTbl.Table(f_tbl, idata, tCase)
+#
+# tCase.set_fixed_unit(tCase.patrol, tCase.target)
+#
+# option_list = [1, 0.75, 0.5]
+# option_var = tk.DoubleVar(window)
+# option_var.trace("w", callback_opt)
+# option_var.set(option_list[0])
+#
+# opt_lbl = tk.Label(frame_opt, text="배속 : ")
+#
+# opt = tk.OptionMenu(frame_opt, option_var, *option_list)
+# opt.config(width=5)
+# opt.pack(side="right")
+# opt_lbl.pack(side="right")
+#
+# cvs = GUI.Canvas(frame_bbs, 550, 400, tCase, operation_x, operation_y)
+# cvs.init_draw_patrol(tCase.patrol, tCase.target)
+# cvs.init_draw_target(tCase.target)
+# cvs.set_operation(0, 0, 20, 10)
+#
+# resText = GUI.ResultText(frame_bbs, 75, 23)
+#
+# progress_bar = tk.ttk.Progressbar(frame_pgb, maximum=100, length=300, mode="determinate")
+# progress_bar.pack()
+# progress_bar.pack_forget()
+#
+#
+#
+# bbs = [cvs, resText]
+# typeChk = type.typeCheck(f_chk, tCase, init_target, info_t, bbs)
+#
+#
+# btn_reset = tk.Button(frame_btn, text="Reset", overrelief="solid", width=15, command=reset_info)
+# btn_reset.grid(row=0, column=0, pady=10, padx=5)
+# btn_run = tk.Button(frame_btn, text="Run", overrelief="solid", width=15, command=toggleBtn)
+# btn_run.grid(row=0, column=1, pady=10, padx=5)
+#
+# for i in range(len(info_t.path_list)):
+#     info_t.path_list[i].bind("<Delete>", lambda event, idx=i: delete_path(event, idx))
+#     info_t.path_list[i].bind('<Double-Button-1>', lambda  event, idx=i: edit_path(event, idx))
+# for i in range(len(info_t.path_entry)):
+#     info_t.path_entry[i].bind("<Return>", lambda event, idx=i: insert_path(event, idx))
+# for i in range(len(info_t.drange_entry)):
+#     info_t.drange_entry[i].bind("<Return>", lambda event, ent=info_t.drange_entry[i], idx=i: update_detection_range_img(event, ent, idx))
+#
+# # print(cvs.set_detection_range_img(tCase.patrol))
+# set_heading_func()
+# set_property_func()
+#
+#
+# window.update()
 
 
 

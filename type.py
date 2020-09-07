@@ -4,40 +4,31 @@ import GUI
 
 class typeCheck:
     tCase = None
-    init_target = None
     bbsType = None
     bbsLbl = None
-    bbsGraphic = None
-    bbsResult = None
     targetType = None
     rdioF = None
     rdioR = None
 
-    def __init__(self, frame, tCase, init_target, info_table, BBS):
+    def __init__(self, frame, tCase, info_table):
         self.tCase = tCase
-        self.init_target = init_target
         self.info_t = info_table
-        self.bbs = BBS
         self.initialize(frame)
 
     def initialize(self, frame):
         ## Check Graphic or Exe result
-        self.bbsType = tk.IntVar()
-        self.bbsLbl = tk.Label(frame, text="프로그램 유형 선택 : ")
-        self.bbsGraphic = tk.Radiobutton(frame, text="그래픽", variable=self.bbsType, value=1)
-        self.bbsGraphic.select()
-        self.bbsGraphic.invoke()
-        self.bbsResult = tk.Radiobutton(frame, text="실행 결과", variable=self.bbsType, value=2)
-
-        self.bbsLbl.grid(row=0, column=0)
-        self.bbsGraphic.grid(row=0, column=1)
-        self.bbsResult.grid(row=0, column=2)
+        # self.bbsType = tk.IntVar()
+        # self.bbsLbl = tk.Label(frame, text="프로그램 유형 선택 : ")
+        # self.bbsGraphic = tk.Radiobutton(frame, text="그래픽", variable=self.bbsType, value=1)
+        # self.bbsGraphic.select()
+        # self.bbsGraphic.invoke()
+        # self.bbsResult = tk.Radiobutton(frame, text="실행 결과", variable=self.bbsType, value=2)
 
         ## Graphic > Check F or R
         self.targetType = tk.IntVar()
-        self.rdioLbl = tk.Label(frame, text="Select Target Type : ")
-        self.rdioF = tk.Radiobutton(frame, text="Fixed", variable=self.targetType, value=1)
-        self.rdioR = tk.Radiobutton(frame, text="Random", variable=self.targetType, value=2)
+        self.rdioLbl = tk.Label(frame, text="Select Target Type : ", bg="white", padx=5, pady=5)
+        self.rdioF = tk.Radiobutton(frame, text="Fixed", variable=self.targetType, value=1, bg="white", padx=5, pady=5)
+        self.rdioR = tk.Radiobutton(frame, text="Random", variable=self.targetType, value=2, bg="white", padx=5, pady=5)
 
         self.rdioLbl.grid(row=1, column=0)
         self.rdioF.grid(row=1, column=1)
@@ -52,15 +43,15 @@ class typeCheck:
         self.printStr = tk.Label(frame, text=" 회")
         self.countVal.set(1)
 
-        self.bbsGraphic.config(command=self.bbsSelectG)
-        self.bbsResult.config(command=self.bbsSelectR)
+        # self.bbsGraphic.config(command=self.bbsSelectG)
+        # self.bbsResult.config(command=self.bbsSelectR)
         self.rdioF.config(command=self.RdiotoFixed)
         self.rdioR.config(command=self.RdiotoRandom)
 
 
 
     def RdiotoFixed(self):
-        self.tCase.target = copy.deepcopy(self.init_target)
+        self.tCase.target = copy.deepcopy(self.tCase.init.target)
         for t in self.tCase.target:
             print("x = {}, y = {}, delay = {}".format(t.x, t.y, t.delay))
 

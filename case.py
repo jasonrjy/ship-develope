@@ -7,7 +7,7 @@ import tkinter.font as tkFont
 
 
 class testCase():
-    def __init__(self, op_x, op_y):
+    def __init__(self, op):
         self.patrol = []
         self.target = []
         self.time = 1
@@ -17,9 +17,14 @@ class testCase():
         self.total_time = 0
         self.accum_time = []
         self.ftime = []
-        self.operation_x = op_x
-        self.operation_y = op_y
-        self.oper_margin = 0
+        self.operation_x = op.x
+        self.operation_y = op.y
+        self.oper_margin = op.margin
+        self.count = 0
+
+    def set_init(self):
+        self.total_time, selfcount, self.patrol, self.target = readFile()
+        self.init = init(self)
 
     def get_all_position(self):
         data = []
@@ -236,6 +241,12 @@ class testCase():
     def get_target(self):
         return self.target
 
+class init():
+    def __init__(self, tCase):
+        self.target = copy.deepcopy(tCase.target)
+        self.patrol = copy.deepcopy(tCase.patrol)
+        self.count = copy.deepcopy(tCase.count)
+        self.total_time = copy.deepcopy(tCase.total_time)
 
 def run_rand_case(tt, p, p_tg, t_tg, op_x, op_y):
     case = testCase(op_x, op_y)
