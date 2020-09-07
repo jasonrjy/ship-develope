@@ -248,8 +248,8 @@ class init():
         self.count = copy.deepcopy(tCase.count)
         self.total_time = copy.deepcopy(tCase.total_time)
 
-def run_rand_case(tt, p, p_tg, t_tg, op_x, op_y):
-    case = testCase(op_x, op_y)
+def run_rand_case(tt, p, p_tg, t_tg, op):
+    case = testCase(op)
     case.set_operation_margin(5)
     case.set_rand_unit(p, tt)
     case.set_total_time(tt)
@@ -365,17 +365,16 @@ def cal_case(tt, cnt, p, t):
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, cnt, find_count[i],
                                                                                 accum_detection_time[i] / cnt, tmp))
 
-def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
+def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op):
     max_detection_time = []
     accum_detection_time = []
     find_count = [0, 0, 0]
     max_target_list = []
     txt = Res.text
-    print(op_x, op_y)
 
     # ### run rand case
     run_p = copy.deepcopy(p)
-    case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op_x, op_y)
+    case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op)
 
 
     for i in range(len(p)):
@@ -387,7 +386,7 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op_x, op_y):
 
     for i in range(cnt - 1):
         run_p = copy.deepcopy(p)
-        case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op_x, op_y)
+        case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op)
         # pg["value"] = i+1
         # w.update()
         pu(i+1)

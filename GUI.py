@@ -353,4 +353,5 @@ class ResultText:
         self.data = []
         self.text = tk.Text(frame, width=w, height=h, relief="solid", padx=5, pady=5)
         self.text.config(state=tk.DISABLED)
+        self.text.pack()
 

@@ -9,6 +9,7 @@ import re
 import cv2
 import math
 from tkinter.messagebox import showinfo
+import tkinter.simpledialog
 import type
 from PIL import Image, ImageTk
 
@@ -70,7 +71,6 @@ class Graphic:
         # progress_bar.pack()
         # progress_bar.pack_forget()
 
-        # bbs = [self.cvs, resText]
         self.type = type.typeCheck(self.frame_info_type, self.tCase, self.info_tbl)
 
         self.btn_reset = tk.Button(self.frame_btn, text="Reset", overrelief="solid", width=15, command=self.reset_info, bg="white")
@@ -87,8 +87,6 @@ class Graphic:
             self.info_tbl.drange_entry[i].bind("<Return>",
                                         lambda event, ent=self.info_tbl.drange_entry[i], idx=i: self.update_detection_range_img(
                                             event, ent, idx))
-
-        # print(self.cvs.set_detection_range_img(tCase.patrol))
         self.set_heading_func()
         self.set_property_func()
 
@@ -323,7 +321,7 @@ class Graphic:
     def insert_path(self, event, idx):
         if self.running == -1:
             origin = self.info_tbl.path_entry[idx].get()
-            input_index = self.info_t.path_list[idx].size() - 1
+            input_index = self.info_tbl.path_list[idx].size() - 1
             if origin.find(": ") != -1:
                 temp = re.split(': ', origin)
                 input_index = int(temp[0])
@@ -356,7 +354,7 @@ class Graphic:
                     origin.insert(selection[0], res)
                     self.tCase.patrol[idx].update_path(selection[0], res)
 
-                self.showinfo('경로를 수정합니다', res)
+                showinfo('경로를 수정합니다', res)
                 self.cvs.update_init_draw_patrol()
             else:
                 self.show_canceled()
