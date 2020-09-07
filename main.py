@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.ttk
+import tkinter.font
 import graphic
 import resultText
 import tkinter.simpledialog
@@ -36,8 +37,8 @@ import copy
 # oper_margin = 5
 
 window = tk.Tk()
-window.title("Ship Detection Program")
-window.geometry("950x550")
+window.title("Ship Detection Program - Ver.1.5.1")
+window.geometry("950x580")
 window.resizable(0, 0)
 wu = window.update
 
@@ -51,6 +52,12 @@ notebook.add(frame_graphic, text="그래픽")
 frame_res_text = tk.Frame(window, bg="white")
 resultText.resText(frame_res_text, wu)
 notebook.add(frame_res_text, text="실행 결과")
+
+frame_copyright = tk.Frame(window, bg="white")
+frame_copyright.pack()
+font = tk.font.Font(family="맑은 고딕", size=10, slant="italic")
+copyright_lbl = tk.Label(frame_copyright, text="Copyright 2020. 656th RJY ALL RIGHTS RESERVED.", fg="blue", font=font)
+copyright_lbl.pack(side=tk.RIGHT)
 
 window.mainloop()
 
