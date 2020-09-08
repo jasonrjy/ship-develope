@@ -372,10 +372,14 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op):
     max_target_list = []
     txt = Res.text
 
+    detection_time_matplotlib = [[] for col in range(len(p))]
+
     # ### run rand case
     run_p = copy.deepcopy(p)
     case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op)
 
+    for t in range(len(p)):
+        detection_time_matplotlib[t].append(case_res[t])
 
     for i in range(len(p)):
         max_detection_time.append(case_res[i])
@@ -387,6 +391,8 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op):
     for i in range(cnt - 1):
         run_p = copy.deepcopy(p)
         case_res, case_target = run_rand_case(tt, run_p, p_tg, t_tg, op)
+        for t in range(len(p)):
+            detection_time_matplotlib[t].append(case_res[t])
         # pg["value"] = i+1
         # w.update()
         pu(i+1)
@@ -429,11 +435,12 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op):
         if not p_tg[i]: continue
         tmp = int((100 * accum_detection_time[i] / cnt) / int(tt))
         print("{}번 경로\n 최대 접촉 시간 : {}".format(i + 1, max_detection_time[i]))
-        temp = "{}번 경로\n 최대 접촉 시간 : {}\n".format(i + 1, max_detection_time[i])
-        txt.insert(tk.END, temp)
+        # temp = "{}번 경로\n 최대 접촉 시간 : {}\n".format(i + 1, max_detection_time[i])
+        # txt.insert(tk.END, temp)
         print(" {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, find_count[i], cnt,
                                                                                 accum_detection_time[i] / cnt, tmp))
-        temp = " {} 번 탐지 횟수 : {} / {} 회  →  탐지율 : ".format(i + 1, find_count[i], cnt)
+        temp = " {} 번 탐지 횟수 : {} / {} 회, 평균 접촉 시간 : {} 분 -> 탐지율 : {} %\n".format(i + 1, find_count[i], cnt,
+                                                                                accum_detection_time[i] / cnt, tmp)
         txt.insert(tk.END, temp)
         txt.configure(fg="#a0a0a0")
         temp = "{} %\n\n".format(tmp)
@@ -442,6 +449,13 @@ def cal_case_write_text(tt, cnt, p, t, Res, p_tg, t_tg, pu, op):
 
         # txt.config(state=DISABLED)
         txt.see("end")
+
+    return detection_time_matplotlib
+
+def formating_matplot_detection_time(data, unit):
+    ## data = [p1,p2,p3]
+    ## formating = [[p1], [p2], [p3]]
+    pass
 
 
 

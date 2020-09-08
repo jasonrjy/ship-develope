@@ -11,8 +11,10 @@ import re
 import GUI
 
 class resText:
-    def __init__(self, frame, window_update):
-        self.window_update = window_update
+    func = None
+
+    def __init__(self, frame):
+        # self.window_update = window_update
 
         self.frame_text = tk.Frame(frame, padx=10, pady=10, bg="white")
         self.frame_info = tk.Frame(frame, padx=10, pady=10, bg="white")
@@ -83,8 +85,11 @@ class resText:
         self.set_heading_func()
         self.set_property_func()
 
-        self.window_update()
+        # self.func.window_update()
 
+
+    def set_func(self, func):
+        self.func = func
 
     def reset_info(self):
         self.running = -1
@@ -157,7 +162,8 @@ class resText:
 
         ## get setting val
         self.tCase.set_info_data(self.info_tbl)
-        self.run_result()
+        dtime = self.run_result()
+        self.func.append_dtime(dtime)
 
         self.btn_run['state'] = tk.NORMAL
         for i in self.info_tbl.path_entry:
@@ -319,7 +325,7 @@ class resText:
 
     def progress_update(self, value):
         self.progress_bar["value"] = value
-        self.window_update()
+        self.func.window_update()
 
     def run_result(self):
         self.running = 1
@@ -332,11 +338,13 @@ class resText:
         self.progress_bar["value"] = 0
         self.progress_bar["maximum"] = cnt
 
-        case.cal_case_write_text(self.tCase.total_time, cnt, self.tCase.patrol, self.tCase.target, self.resText,
+        matplot_detection_time = case.cal_case_write_text(self.tCase.total_time, cnt, self.tCase.patrol, self.tCase.target, self.resText,
                                  self.info_tbl.patrol_btn_tg, self.info_tbl.target_btn_tg,
                                  self.progress_update, self.operation)
         self.resText.text.config(state=tk.DISABLED)
         self.progress_bar.pack_forget()
+
+        return matplot_detection_time
 
     def callback(self, P):
         if str.isdigit(P) or P == "":

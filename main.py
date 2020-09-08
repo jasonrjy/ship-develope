@@ -3,6 +3,7 @@ import tkinter.ttk
 import tkinter.font
 import graphic
 import resultText
+import matplot
 import tkinter.simpledialog
 from tkinter.messagebox import askquestion, showinfo
 import time
@@ -36,8 +37,21 @@ import copy
 # operation_y = 10
 # oper_margin = 5
 
+class func_res:
+    def __init__(self, wu=None, append_dtime=None):
+        self.window_update = wu
+        self.append_dtime = append_dtime
+
+class func_mat:
+    def __init__(self, wu=None, notebook_active=None):
+        self.window_update = wu
+        self.notebook_active = notebook_active
+
+def mat_active():
+    notebook.add(frame_matplt, text="시각화")
+
 window = tk.Tk()
-window.title("Ship Detection Program - Ver.1.5.1")
+window.title("Ship Detection Program - Ver.1.5.2")
 window.geometry("950x580")
 window.resizable(0, 0)
 wu = window.update
@@ -50,8 +64,18 @@ graphic.Graphic(frame_graphic, wu)
 notebook.add(frame_graphic, text="그래픽")
 
 frame_res_text = tk.Frame(window, bg="white")
-resultText.resText(frame_res_text, wu)
+res = resultText.resText(frame_res_text)
 notebook.add(frame_res_text, text="실행 결과")
+
+frame_matplt = tk.Frame(window, bg="white")
+mat = matplot.Matplot(frame_matplt)
+
+func1 = func_res(wu=wu, append_dtime=mat.append_detection_time)
+res.set_func(func1)
+res.func.window_update()
+
+func_m = func_mat(wu=wu, notebook_active=mat_active)
+mat.set_func(func_m)
 
 frame_copyright = tk.Frame(window, bg="white")
 frame_copyright.pack()
@@ -59,7 +83,12 @@ font = tk.font.Font(family="맑은 고딕", size=10, slant="italic")
 copyright_lbl = tk.Label(frame_copyright, text="Copyright 2020. 656th RJY ALL RIGHTS RESERVED.", fg="blue", font=font)
 copyright_lbl.pack(side=tk.RIGHT)
 
+
 window.mainloop()
+
+
+
+
 
 # frame_info = tk.Frame(window)
 # frame_bbs = tk.Frame(window, padx=10, pady=10)
